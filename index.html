@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>News Hub Pro | Kabbo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e0eaf5 0%, #cfdef3 100%);
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --danger: #ef4444;
+            --nav-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Noto Serif Bengali', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            background: var(--bg-gradient); 
+            min-height: 100dvh; 
+            color: var(--text-main); 
+            display: flex; 
+            flex-direction: column;
+            overflow-x: hidden;
+            background-attachment: fixed;
+        }
+
+        /* --- UI Views --- */
+        .view-section { display: none; flex-direction: column; height: 100%; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Sticky Top Container (Overlap Bug Fixed) --- */
+        .top-sticky-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000; /* Increased z-index to keep it strictly on top */
+            background: rgba(255, 255, 255, 0.95); /* More solid background to hide scrolling cards */
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        /* --- Header --- */
+        .app-header {
+            padding: 15px 20px; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .app-title { font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        .icon-btn { background: transparent; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .icon-btn:active { transform: scale(0.9); }
+
+        /* --- Category Tabs --- */
+        .category-nav {
+            display: flex; gap: 10px; padding: 0 20px 15px 20px; overflow-x: auto; scrollbar-width: none;
+        }
+        .category-nav::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 8px 20px;
+            border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+            cursor: pointer; white-space: nowrap; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+
+        /* --- Universal Search --- */
+        .search-container { padding: 15px 20px; }
+        .search-box {
+            background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 12px 20px;
+            border-radius: 16px; width: 100%; display: flex; align-items: center; gap: 10px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .search-box input { border: none; background: transparent; width: 100%; outline: none; font-size: 1rem; color: var(--text-main); }
+
+        /* --- News Layouts (Grid & List) --- */
+        /* Fixed Bottom Overlap by adding 110px padding-bottom here */
+        .news-container { padding: 15px 20px 110px 20px; transition: all 0.3s ease; }
+        
+        /* Grid View Layout */
+        .news-container.grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .grid-view .news-card { flex-direction: column; text-align: center; padding: 15px; }
+        .grid-view .news-logo { width: 55px; height: 55px; margin: 0 auto 10px auto; }
+        .grid-view .card-actions { border-top: 1px solid rgba(0,0,0,0.05); margin-top: 10px; padding-top: 10px; width: 100%; justify-content: space-between; }
+        
+        /* List View Layout */
+        .news-container.list-view { display: flex; flex-direction: column; gap: 12px; }
+        .list-view .news-card { flex-direction: row; text-align: left; padding: 12px 15px; align-items: center; gap: 15px; }
+        .list-view .news-logo { width: 45px; height: 45px; margin: 0; flex-shrink: 0; }
+        .list-view .card-content { flex: 1; overflow: hidden; }
+        .list-view .news-title { font-size: 1rem; -webkit-line-clamp: 1; }
+        .list-view .card-actions { border-top: none; margin-top: 0; padding-top: 0; width: auto; gap: 15px; justify-content: flex-end; }
+        .list-view .action-btn { font-size: 1.2rem; }
+        .list-view .read-btn { display: none; }
+
+        /* Base Card Styling */
+        .news-card {
+            background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 16px; display: flex;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04); transition: transform 0.2s, background 0.2s; cursor: pointer;
+            z-index: 1; /* Keep cards below sticky header */
+        }
+        .news-card:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.9); }
+        
+        .news-logo { border-radius: 50%; object-fit: contain; background: white; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .news-title { font-size: 0.95rem; font-weight: 700; line-height: 1.3; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 2px;}
+        .news-url { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .card-actions { display: flex; align-items: center; }
+        .action-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        .action-btn.fav { color: var(--danger); }
+        .read-btn { background: var(--primary-light); color: white; border: none; padding: 5px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+
+        /* --- Forms & Profile --- */
+        .form-container, .profile-container { padding: 20px 20px 110px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.85rem; font-weight: 600; color: var(--primary); }
+        .custom-input { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 14px; border-radius: 12px; outline: none; font-size: 0.95rem; color: var(--text-main); }
+        .main-btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); transition: 0.2s; }
+        .main-btn:active { transform: scale(0.97); }
+        
+        .profile-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #60a5fa); color: white; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; margin: 0 auto 15px auto; border: 4px solid white; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        
+        /* --- Bottom Navigation --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background: var(--nav-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center;
+            z-index: 1000; /* Ensure bottom nav is always on top */
+            padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: color 0.3s; flex: 1; }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 1.3rem; margin-bottom: 2px; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Top Sticky Area: Header + Category Nav -->
+    <div class="top-sticky-container" id="topStickyContainer">
+        <header class="app-header">
+            <div class="app-title"><i class="fa-solid fa-layer-group"></i> Kabbo News </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="toggleLayout()" id="layoutToggleBtn" title="Change View">
+                    <i class="fa-solid fa-list-ul"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Category Nav (Only visible on Home View) -->
+                        <nav class="category-nav" id="categoryNav">
+            <button class="tab-btn active" onclick="filterCategory('all', this)">সব খবর</button>
+            <button class="tab-btn" onclick="filterCategory('national', this)">জাতীয়</button>
+            <button class="tab-btn" onclick="filterCategory('online', this)">অনলাইন</button>
+            <button class="tab-btn" onclick="filterCategory('local', this)">আঞ্চলিক</button>
+            <button class="tab-btn" onclick="filterCategory('indian', this)">কলকাতা</button> <!-- নতুন -->
+            <button class="tab-btn" onclick="filterCategory('epaper', this)">ই-পেপার</button>
+            <button class="tab-btn" onclick="filterCategory('tv', this)">টিভি চ্যানেল</button>
+            <button class="tab-btn" onclick="filterCategory('magazine', this)">ম্যাগাজিন</button> <!-- নতুন -->
+            <button class="tab-btn" onclick="filterCategory('jobs', this)">চাকরি</button> <!-- নতুন -->
+            <button class="tab-btn" onclick="filterCategory('education', this)">শিক্ষা</button> <!-- নতুন -->
+            <button class="tab-btn" onclick="filterCategory('english', this)">English</button>
+            <button class="tab-btn" onclick="filterCategory('custom', this)">আমার লিংক</button>
+        </nav>
+        
+    </div>
+
+    <!-- VIEW: Home (Categories & Grid) -->
+    <div id="view-home" class="view-section active">
+        <main class="news-container grid-view" id="homeGrid"></main>
+    </div>
+
+    <!-- VIEW: Search & Favorites -->
+    <div id="view-search" class="view-section">
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                <input type="text" id="searchInput" placeholder="পত্রিকার নাম বা লিংক খুঁজুন..." onkeyup="handleSearch()">
+            </div>
+        </div>
+        <div style="padding: 0 20px 10px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1rem; color: var(--text-main);">ফলাফল / ফেভারিটস</h3>
+            <button class="tab-btn" style="padding: 5px 15px;" onclick="showOnlyFavorites()">শুধু ফেভারিট</button>
+        </div>
+        <main class="news-container grid-view" id="searchGrid"></main>
+    </div>
+
+    <!-- VIEW: Add Custom URL -->
+    <div id="view-add" class="view-section">
+        <div class="form-container">
+            <h2 style="color: var(--primary); margin-bottom: 5px;"><i class="fa-solid fa-link"></i> নতুন লিংক যুক্ত করুন</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">আপনার পছন্দের পত্রিকার লিংক দিয়ে কাস্টমাইজ করুন। লোগো স্বয়ংক্রিয়ভাবে জেনারেট হবে!</p>
+            
+            <div class="input-group">
+                <label>পত্রিকার নাম</label>
+                <input type="text" id="customName" class="custom-input" placeholder="যেমন: আমার ব্লগ">
+            </div>
+            <div class="input-group">
+                <label>ওয়েবসাইট লিংক (URL)</label>
+                <input type="url" id="customUrl" class="custom-input" placeholder="https://www.example.com">
+            </div>
+            
+            <button class="main-btn" onclick="saveCustomLink()" style="margin-top: 10px;">সেভ করুন</button>
+        </div>
+    </div>
+
+    <!-- VIEW: Profile Management -->
+    <div id="view-profile" class="view-section">
+        <div class="profile-container">
+            <div class="profile-card">
+                <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
+                <h2 id="displayProfileName" style="color: var(--primary);">Kabbo</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">প্রোফাইল ম্যানেজার</p>
+            </div>
+            
+            <h3 style="margin-top: 10px; color: var(--text-main); font-size: 1.1rem;">প্রোফাইল এডিট করুন</h3>
+            <div class="input-group">
+                <label>আপনার নাম</label>
+                <input type="text" id="profileNameInput" class="custom-input" value="Kabbo">
+            </div>
+            <button class="main-btn" onclick="saveProfile()">আপডেট প্রোফাইল</button>
+            <button class="main-btn" onclick="clearAppData()" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); margin-top: 10px; box-shadow: none;">সমস্ত ডাটা মুছুন</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('home', this)">
+            <i class="fa-solid fa-house nav-icon"></i>
+            <span>হোম</span>
+        </div>
+        <div class="nav-item" onclick="switchView('search', this)">
+            <i class="fa-solid fa-magnifying-glass nav-icon"></i>
+            <span>সার্চ</span>
+        </div>
+        <div class="nav-item" onclick="switchView('add', this)">
+            <i class="fa-solid fa-circle-plus nav-icon"></i>
+            <span>যুক্ত করুন</span>
+        </div>
+        <div class="nav-item" onclick="switchView('profile', this)">
+            <i class="fa-solid fa-user nav-icon"></i>
+            <span>প্রোফাইল</span>
+        </div>
+    </div>
+
+    <script>
+                // --- 1. Database ---
+                // --- 1. Database (Mega Collection) ---
+        const initialDB = [
+            // --- জাতীয় (National) ---
+            { id: "1", name: "প্রথম আলো", url: "https://www.prothom-alo.com", category: "national" },
+            { id: "2", name: "বাংলাদেশ প্রতিদিন", url: "https://www.bd-pratidin.com", category: "national" },
+            { id: "3", name: "ইত্তেফাক", url: "https://www.ittefaq.com.bd", category: "national" },
+            { id: "4", name: "কালের কণ্ঠ", url: "https://www.kalerkantho.com", category: "national" },
+            { id: "5", name: "নয়া দিগন্ত", url: "https://www.dailynayadiganta.com", category: "national" },
+            { id: "6", name: "আমার সংবাদ", url: "https://www.amar-sangbad.com", category: "national" },
+            { id: "7", name: "প্রতিদিনের সংবাদ", url: "https://www.protidinersangbad.com", category: "national" },
+            { id: "8", name: "যুগান্তর", url: "https://www.jugantor.com", category: "national" },
+            { id: "9", name: "সংগ্রাম", url: "https://www.dailysangram.com", category: "national" },
+            { id: "10", name: "মানবজমিন", url: "https://www.mzamin.com", category: "national" },
+            { id: "11", name: "আমাদের সময়", url: "https://www.dainikamadershomoy.com", category: "national" },
+            { id: "12", name: "বণিক বার্তা", url: "https://www.bonikbarta.net", category: "national" },
+            { id: "13", name: "সমকাল", url: "https://www.samakal.com", category: "national" },
+            { id: "14", name: "জনকণ্ঠ", url: "https://www.dailyjanakantha.com", category: "national" },
+            { id: "15", name: "যায়যায়দিন", url: "https://www.jjdin.com", category: "national" },
+            { id: "16", name: "ভোরের কাগজ", url: "https://www.bhorerkagoj.net", category: "national" },
+            { id: "17", name: "অর্থনীতির কাগজ", url: "https://www.arthoniteerkagoj.com", category: "national" },
+            { id: "18", name: "ইনকিলাব", url: "https://www.dailyinqilab.com", category: "national" },
+            { id: "19", name: "সংবাদ", url: "https://www.thesangbad.net", category: "national" },
+            { id: "20", name: "মানব কণ্ঠ", url: "https://www.manobkantha.com", category: "national" },
+            { id: "21", name: "সুপ্রভাত", url: "https://www.suprobhat.com", category: "national" },
+            { id: "22", name: "বাংলাদেশ জার্নাল", url: "https://www.bd-journal.com", category: "national" },
+            { id: "23", name: "দিনকাল", url: "https://www.dailydinkal.net", category: "national" },
+            { id: "24", name: "আলোকিত বাংলাদেশ", url: "https://www.alokitobangladesh.com", category: "national" },
+            { id: "25", name: "আজকের বাজার", url: "https://www.ajkerbazzar.com", category: "national" },
+            { id: "26", name: "আমাদের অর্থনীতি", url: "https://www.amaderorthoneeti.com", category: "national" },
+            { id: "27", name: "সরজমিন বার্তা", url: "https://www.sorejominbarta.com", category: "national" },
+            { id: "28", name: "খবরপত্র", url: "https://www.khabarpatrabd.com", category: "national" },
+            { id: "29", name: "ভোরের পাতা", url: "https://www.dailyvorerpata.com", category: "national" },
+            { id: "30", name: "সময়ের আলো", url: "https://www.shomoyeralo.com", category: "national" },
+            { id: "31", name: "কালবেলা", url: "https://www.kalbela.com", category: "national" },
+            { id: "32", name: "শেয়ার বিজ", url: "https://www.sharebiz.net", category: "national" },
+            { id: "33", name: "বর্তমান", url: "https://www.dailybartoman.com", category: "national" },
+            { id: "34", name: "আজকালের খবর", url: "https://www.ajkalerkhobor.com", category: "national" },
+            { id: "35", name: "সংবাদ কণিকা", url: "https://www.sangbadkonika.com", category: "national" },
+            { id: "36", name: "খোলা কাগজ", url: "https://www.kholakagojbd.com", category: "national" },
+            { id: "37", name: "গণকণ্ঠ", url: "https://www.gonokantho.com", category: "national" },
+            { id: "38", name: "দেশ রূপান্তর", url: "https://www.deshrupantor.com", category: "national" },
+            { id: "39", name: "বাংলাদেশের খবর", url: "https://www.bangladesherkhabor.net", category: "national" },
+            { id: "40", name: "বিডি বুলেটিন", url: "https://www.bd-bulletin.com", category: "national" },
+            { id: "41", name: "দৈনিক জাগরণ", url: "https://www.dailyjagaran.com", category: "national" },
+            { id: "42", name: "আজকের পত্রিকা", url: "https://www.ajkerpatrika.com", category: "national" },
+            { id: "43", name: "দৈনিক বাংলা", url: "https://www.dainikbangla.com.bd", category: "national" },
+
+            // --- টিভি চ্যানেল (TV) ---
+            { id: "44", name: "সময় টিভি", url: "https://www.somoynews.tv", category: "tv" },
+            { id: "45", name: "যমুনা টিভি", url: "https://www.jamuna.tv", category: "tv" },
+            { id: "46", name: "চ্যানেল আই", url: "https://www.channelionline.com", category: "tv" },
+            { id: "47", name: "ইন্ডিপেনডেন্ট টিভি", url: "https://www.independent24.com", category: "tv" },
+
+            // --- ইংরেজি (English) ---
+            { id: "48", name: "The Daily Star", url: "https://www.thedailystar.net", category: "english" },
+            { id: "49", name: "Daily Observer", url: "https://www.observerbd.com", category: "english" },
+            { id: "50", name: "Financial Express", url: "https://www.thefinancialexpress.com.bd", category: "english" },
+            { id: "51", name: "Bangladesh Post", url: "https://www.bangladeshpost.net", category: "english" },
+            { id: "52", name: "Business Standard", url: "https://www.tbsnews.net", category: "english" },
+            { id: "53", name: "Dhaka Tribune", url: "https://www.dhakatribune.com", category: "english" },
+            { id: "54", name: "Business Post", url: "https://www.businesspostbd.com", category: "english" },
+
+            // --- ই-পেপার (E-paper) ---
+            { id: "55", name: "E Prothom Alo", url: "https://epaper.prothomalo.com", category: "epaper" },
+            { id: "56", name: "E BD Pratidin", url: "https://epaper.bd-pratidin.com", category: "epaper" },
+            { id: "57", name: "E Jugantor", url: "https://ejugantor.com", category: "epaper" },
+            { id: "58", name: "E Samakal", url: "https://epaper.samakal.com", category: "epaper" },
+            { id: "59", name: "E Janakantha", url: "https://edailyjanakantha.com", category: "epaper" },
+            { id: "60", name: "E Bonik Barta", url: "https://epaper.bonikbarta.net", category: "epaper" },
+            { id: "61", name: "E Naya Diganta", url: "https://enayadiganta.com", category: "epaper" },
+            { id: "62", name: "E Financial Express", url: "https://epaper.thefinancialexpress.com.bd", category: "epaper" },
+            { id: "63", name: "E Ittefaq", url: "https://epaper.ittefaq.com.bd", category: "epaper" },
+            { id: "64", name: "E Kalerkantho", url: "https://ekalerkantho.com", category: "epaper" },
+            { id: "65", name: "E Amadershomoy", url: "https://epaper.dainikamadershomoy.com", category: "epaper" },
+            { id: "66", name: "E Jai Jai Din", url: "https://ejjdin.com", category: "epaper" },
+            { id: "67", name: "E Daily Inqilab", url: "https://epaper.dailyinqilab.com", category: "epaper" },
+            { id: "68", name: "Daily Star Epaper", url: "https://epaper.thedailystar.net", category: "epaper" },
+            { id: "69", name: "E Business Standard", url: "https://epaper.tbsnews.net", category: "epaper" },
+            { id: "70", name: "E Share biz", url: "https://epaper.sharebiz.net", category: "epaper" },
+            { id: "71", name: "E Bhorer Kagoj", url: "https://ebhorerkagoj.com", category: "epaper" },
+            { id: "72", name: "E Bangladesh Today", url: "https://epaper.thebangladeshtoday.com", category: "epaper" },
+
+            // --- অনলাইন নিউজ (Online) ---
+            { id: "73", name: "BD News 24", url: "https://bangla.bdnews24.com", category: "online" },
+            { id: "74", name: "Bangla News 24", url: "https://banglanews24.com", category: "online" },
+            { id: "75", name: "Jago News 24", url: "https://jagonews24.com", category: "online" },
+            { id: "76", name: "Priyo", url: "https://priyo.com", category: "online" },
+            { id: "77", name: "Amadershomoys", url: "https://amadershomoys.com", category: "online" },
+            { id: "78", name: "Bd24live", url: "https://bd24live.com", category: "online" },
+            { id: "79", name: "Risingbd", url: "https://risingbd.com", category: "online" },
+            { id: "80", name: "Daily Bangladesh", url: "https://daily-bangladesh.com", category: "online" },
+            { id: "81", name: "Gonews 24", url: "https://gonews24.com", category: "online" },
+            { id: "82", name: "Dhaka Post", url: "https://dhakapost.com", category: "online" },
+            { id: "83", name: "Bangla Tribune", url: "https://banglatribune.com", category: "online" },
+            { id: "84", name: "Bangla Insider", url: "https://banglainsider.com", category: "online" },
+            { id: "85", name: "UNB", url: "https://unb.com.bd", category: "online" },
+            { id: "86", name: "BSS News", url: "https://bssnews.net", category: "online" },
+            { id: "87", name: "Barta24", url: "https://barta24.com", category: "online" },
+            { id: "88", name: "Amar Desh", url: "https://amardesh.com", category: "online" },
+            { id: "89", name: "Sarabangla", url: "https://sarabangla.net", category: "online" },
+            { id: "90", name: "Dhaka Times", url: "https://dhakatimes.com.bd", category: "online" },
+            { id: "91", name: "DMP News", url: "https://dmpnews.org", category: "online" },
+            { id: "92", name: "The Report 24", url: "https://thereport24.com", category: "online" },
+            { id: "93", name: "Somoyer Konthosor", url: "https://somoyerkonthosor.com", category: "online" },
+            { id: "94", name: "Artho Suchak", url: "https://arthosuchak.com", category: "online" },
+            { id: "95", name: "Share News 24", url: "https://sharenews24.com", category: "online" },
+            { id: "96", name: "Sunbd24", url: "https://sunbd24.com", category: "online" },
+            { id: "97", name: "Orthosongbad", url: "https://orthosongbad.com", category: "online" },
+            { id: "98", name: "Sotta Sangbad", url: "https://ajkersottasangbad24.com", category: "online" },
+            { id: "99", name: "1News BD", url: "https://1newsbd.com", category: "online" },
+            { id: "100", name: "Desh News", url: "https://deshnews.net", category: "online" },
+            { id: "101", name: "Desher Sangbad", url: "https://deshersangbad.com", category: "online" },
+            { id: "102", name: "Last News Bd", url: "https://lastnewsbd.com", category: "online" },
+            { id: "103", name: "Bangla Daily 24", url: "https://bangladaily24.com", category: "online" },
+            { id: "104", name: "Protikhon", url: "https://protikhon.com", category: "online" },
+            { id: "105", name: "Barta Bangla", url: "https://bartabangla.com", category: "online" },
+            { id: "106", name: "BD Type", url: "https://bdtype.com", category: "online" },
+            { id: "107", name: "Zoom Bangla", url: "https://news.zoombangla.com", category: "online" },
+            { id: "108", name: "SNN24", url: "https://snn24.com", category: "online" },
+            { id: "109", name: "Alert News", url: "https://alertnews24.com", category: "online" },
+            { id: "110", name: "Khobor Protidin", url: "https://khoborprotidin24.com", category: "online" },
+            { id: "111", name: "BD Cricteam", url: "https://bdcricteam.com", category: "online" },
+            { id: "112", name: "Bbc 24 News", url: "https://bbc24news.com", category: "online" },
+            { id: "113", name: "Tulpar24", url: "https://tulpar24.com", category: "online" },
+            { id: "114", name: "Latest bd news", url: "https://latestbdnews.com", category: "online" },
+            { id: "115", name: "Barta Bazar", url: "https://bartabazar.com", category: "online" },
+            { id: "116", name: "Dhaka Protidin", url: "https://dhakaprotidin.com", category: "online" },
+            { id: "117", name: "Eibela", url: "https://eibela.com", category: "online" },
+            { id: "118", name: "PBD", url: "https://pbd.news", category: "online" },
+            { id: "119", name: "Techshohor", url: "https://techshohor.com", category: "online" },
+            { id: "120", name: "Tech Zoom", url: "https://techzoom.tv", category: "online" },
+
+            // --- আঞ্চলিক (Local) ---
+            { id: "121", name: "Daily Azadi", url: "https://dainikazadi.net", category: "local" },
+            { id: "122", name: "Daily Purbokone", url: "https://dainikpurbokone.net", category: "local" },
+            { id: "123", name: "Amader Comilla", url: "https://dailyamadercomilla.com", category: "local" },
+            { id: "124", name: "Daily Purbanchal", url: "https://purbanchal.com", category: "local" },
+            { id: "125", name: "Coxsbazar News", url: "https://coxsbazarnews.com", category: "local" },
+            { id: "126", name: "Ukhiya News", url: "https://ukhiyanews.com", category: "local" },
+            { id: "127", name: "Khulna News", url: "https://khulnanews.com", category: "local" },
+            { id: "128", name: "Matha Bhanga", url: "https://mathabhanga.com", category: "local" },
+            { id: "129", name: "Rajshahi News 24", url: "https://rajshahinews24.com", category: "local" },
+            { id: "130", name: "Chattagram News", url: "https://chattagramnews.com", category: "local" },
+            { id: "131", name: "Daily Khowai", url: "https://dailykhowai.com", category: "local" },
+            { id: "132", name: "Daily Karatoa", url: "https://karatoa.com.bd", category: "local" },
+            { id: "133", name: "Dainik Sylhet", url: "https://dainiksylhet.com", category: "local" },
+            { id: "134", name: "Daily Coxsbazar", url: "https://dailycoxsbazar.com", category: "local" },
+            { id: "135", name: "Uttorpurbo", url: "https://uttorpurbo.com", category: "local" },
+            { id: "136", name: "Ajker Jamalpur", url: "https://ajkerjamalpur.com", category: "local" },
+            { id: "137", name: "Amader Barisal", url: "https://amaderbarisal.com", category: "local" },
+            { id: "138", name: "Surma Times", url: "https://surmatimes.com", category: "local" },
+            { id: "139", name: "Daily Sylhet", url: "https://dailysylhet.com", category: "local" },
+            { id: "140", name: "Chadpur Times", url: "https://chandpurtimes.com", category: "local" },
+            { id: "141", name: "Mukto Khobor 24", url: "https://muktokhobor24.com", category: "local" },
+            { id: "142", name: "Bogra Sangbad", url: "https://bograsangbad.com", category: "local" },
+            { id: "143", name: "Rajshahir Somoy", url: "https://rajshahirsomoy.com", category: "local" },
+            { id: "144", name: "Sylhet Express", url: "https://sylhetexpress.com", category: "local" },
+            { id: "145", name: "Laksmipur 24", url: "https://lakshmipur24.com", category: "local" },
+            { id: "146", name: "Prothom Feni", url: "https://prothomfeni.com", category: "local" },
+            { id: "147", name: "Amar Noakhali", url: "https://amarnoakhali.com", category: "local" },
+            { id: "148", name: "Chakaria News", url: "https://chakarianews.com", category: "local" },
+            { id: "149", name: "Gramer Kagoj", url: "https://gramerkagoj.com", category: "local" },
+            { id: "150", name: "Khulnanchal", url: "https://khulnanchal.com", category: "local" },
+
+            // --- ভারত/কলকাতা (Indian/Kolkata) ---
+            { id: "151", name: "Ananda Bazar", url: "https://www.anandabazar.com", category: "indian" },
+            { id: "152", name: "Aaj Kaal", url: "https://www.aajkaal.net", category: "indian" },
+            { id: "153", name: "Kolkata24x7", url: "https://www.kolkata24x7.in", category: "indian" },
+            { id: "154", name: "24 Ghanta", url: "https://zeenews.india.com/bengali", category: "indian" },
+            { id: "155", name: "ABP Ananda", url: "https://bengali.abplive.com", category: "indian" },
+            { id: "156", name: "NDTV Bengali", url: "https://bengali.ndtv.com", category: "indian" },
+            { id: "157", name: "Syandan Patrika", url: "https://www.syandanpatrika.com", category: "indian" },
+            { id: "158", name: "Sangbad Pratidin", url: "https://www.sangbadpratidin.in", category: "indian" },
+            { id: "159", name: "Bartaman Patrika", url: "https://bartamanpatrika.com", category: "indian" },
+            { id: "160", name: "Ganashakti", url: "https://ganashakti.com", category: "indian" },
+            { id: "161", name: "Asomiya Pratidin", url: "https://www.asomiyapratidin.co.in", category: "indian" },
+            { id: "162", name: "Eisamay", url: "https://epaper.eisamay.com", category: "indian" },
+            { id: "163", name: "Uttarbanga Sambad", url: "https://www.uttarbangasambad.com", category: "indian" },
+            { id: "164", name: "Ebela", url: "https://ebela.in", category: "indian" },
+            { id: "165", name: "Dainik Sambad", url: "https://dainiksambad.net", category: "indian" },
+            { id: "166", name: "Aamader Malda", url: "https://www.aamadermalda.in", category: "indian" },
+
+            // --- ম্যাগাজিন (Magazine) ---
+            { id: "167", name: "Bangladesher Khela", url: "https://bangladesherkhela.com", category: "magazine" },
+            { id: "168", name: "Weekly Bangalee", url: "https://weeklybangalee.com", category: "magazine" },
+            { id: "169", name: "Dhaka Courier", url: "https://dhakacourier.com.bd", category: "magazine" },
+            { id: "170", name: "Bichitra", url: "https://bichitra.org", category: "magazine" },
+            { id: "171", name: "Comjagat", url: "https://comjagat.com", category: "magazine" },
+            { id: "172", name: "Weekly Holiday", url: "https://weeklyholiday.net", category: "magazine" },
+            { id: "173", name: "Kali O Kalam", url: "https://kaliokalam.com", category: "magazine" },
+            { id: "174", name: "Scientific Bangladesh", url: "https://scientificbangladesh.com", category: "magazine" },
+
+            // --- চাকরি (Jobs) ---
+            { id: "175", name: "Bdjobs", url: "https://bdjobs.com", category: "jobs" },
+            { id: "176", name: "Jobsbd", url: "https://jobsbd.com", category: "jobs" },
+            { id: "177", name: "Jobsa1", url: "https://jobsa1.com", category: "jobs" },
+            { id: "178", name: "Jobsinbd", url: "https://jobsinbd.com", category: "jobs" },
+            { id: "179", name: "Bdjobstoday", url: "https://bdjobstoday.com", category: "jobs" },
+            { id: "180", name: "Job.com.bd", url: "https://job.com.bd", category: "jobs" },
+            { id: "181", name: "Jobsearch Australia", url: "https://jobsearch.gov.au", category: "jobs" },
+
+            // --- শিক্ষা (Education) ---
+            { id: "182", name: "Education Bangla", url: "https://educationbangla.com", category: "education" },
+            { id: "183", name: "Educationboard Result", url: "https://educationboardresults.gov.bd", category: "education" },
+            { id: "184", name: "National University", url: "https://nu.edu.bd", category: "education" }
+        ];
+
+        // --- 2. State Management ---
+        let newsData = JSON.parse(localStorage.getItem('kabbo_news_db_v2')) || initialDB;
+        let favorites = JSON.parse(localStorage.getItem('kabbo_news_fav_v2')) || [];
+        let profileName = localStorage.getItem('kabbo_profile_name_v2') || "Kabbo";
+        let currentCategory = 'all';
+        let isGridView = localStorage.getItem('kabbo_layout_view') !== 'list';
+
+        // --- 3. UI Layout Toggle (Grid <-> List) ---
+        function toggleLayout() {
+            isGridView = !isGridView;
+            localStorage.setItem('kabbo_layout_view', isGridView ? 'grid' : 'list');
+            
+            const homeGrid = document.getElementById('homeGrid');
+            const searchGrid = document.getElementById('searchGrid');
+            const iconBtn = document.getElementById('layoutToggleBtn');
+            
+            if (isGridView) {
+                homeGrid.className = 'news-container grid-view';
+                searchGrid.className = 'news-container grid-view';
+                iconBtn.innerHTML = '<i class="fa-solid fa-list-ul"></i>';
+            } else {
+                homeGrid.className = 'news-container list-view';
+                searchGrid.className = 'news-container list-view';
+                iconBtn.innerHTML = '<i class="fa-solid fa-border-all"></i>';
+            }
+        }
+
+        // Apply saved layout on load
+        function applySavedLayout() {
+            const iconBtn = document.getElementById('layoutToggleBtn');
+            if (isGridView) {
+                document.getElementById('homeGrid').className = 'news-container grid-view';
+                document.getElementById('searchGrid').className = 'news-container grid-view';
+                iconBtn.innerHTML = '<i class="fa-solid fa-list-ul"></i>';
+            } else {
+                document.getElementById('homeGrid').className = 'news-container list-view';
+                document.getElementById('searchGrid').className = 'news-container list-view';
+                iconBtn.innerHTML = '<i class="fa-solid fa-border-all"></i>';
+            }
+        }
+
+        // --- 4. Auto Sync Logo Fetcher ---
+        function getFaviconURL(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+            } catch (e) {
+                return '';
+            }
+        }
+        
+        function generateFallbackAvatar(name) {
+            const initial = name.charAt(0).toUpperCase();
+            return `https://ui-avatars.com/api/?name=${initial}&background=2563eb&color=fff&size=128`;
+        }
+
+        function renderGrid(dataToRender, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            if (dataToRender.length === 0) {
+                container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); margin-top:30px;">কোনো ডাটা পাওয়া যায়নি।</p>`;
+                return;
+            }
+
+            dataToRender.forEach(news => {
+                const isFav = favorites.includes(news.id);
+                const logoUrl = getFaviconURL(news.url);
+                const cleanUrl = news.url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+                
+                const card = document.createElement('div');
+                card.className = 'news-card';
+                card.onclick = (e) => {
+                    if(!e.target.closest('.action-btn')) {
+                        window.open(news.url, '_blank');
+                    }
+                };
+
+                card.innerHTML = `
+                    <img src="${logoUrl}" alt="logo" class="news-logo" onerror="this.onerror=null; this.src='${generateFallbackAvatar(news.name)}';">
+                    <div class="card-content">
+                        <div class="news-title">${news.name}</div>
+                        <div class="news-url">${cleanUrl}</div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-btn ${isFav ? 'fav' : ''}" onclick="toggleFav('${news.id}', '${containerId}', event)">
+                            <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                        </button>
+                        <button class="action-btn" onclick="shareWeb('${news.name}', '${news.url}', event)">
+                            <i class="fa-solid fa-share-nodes"></i>
+                        </button>
+                        <button class="read-btn" onclick="window.open('${news.url}', '_blank')">ভিজিট</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- 5. Core Logic ---
+        function filterCategory(cat, btnElement) {
+            currentCategory = cat;
+            document.querySelectorAll('#categoryNav .tab-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            
+            let filtered = cat === 'all' ? newsData : newsData.filter(n => n.category === cat);
+            renderGrid(filtered, 'homeGrid');
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = newsData.filter(n => 
+                n.name.toLowerCase().includes(query) || n.url.toLowerCase().includes(query)
+            );
+            renderGrid(filtered, 'searchGrid');
+        }
+
+        function showOnlyFavorites() {
+            const filtered = newsData.filter(n => favorites.includes(n.id));
+            renderGrid(filtered, 'searchGrid');
+        }
+
+        function toggleFav(id, currentContainer, event) {
+            event.stopPropagation(); 
+            if (favorites.includes(id)) {
+                favorites = favorites.filter(fId => fId !== id);
+            } else {
+                favorites.push(id);
+            }
+            localStorage.setItem('kabbo_news_fav_v2', JSON.stringify(favorites));
+            
+            if(currentContainer === 'homeGrid') {
+                filterCategory(currentCategory, document.querySelector('#categoryNav .tab-btn.active'));
+            } else {
+                if(document.getElementById('searchInput').value === "") {
+                    showOnlyFavorites();
+                } else {
+                    handleSearch(); 
+                }
+            }
+        }
+
+        function shareWeb(title, url, event) {
+            event.stopPropagation();
+            if (navigator.share) {
+                navigator.share({ title: title, url: url }).catch(err => console.log("Share failed", err));
+            } else {
+                navigator.clipboard.writeText(url);
+                alert("আপনার ব্রাউজারে শেয়ার সাপোর্টেড নয়, লিংক কপি করা হয়েছে!");
+            }
+        }
+
+        // --- 6. Forms & Profiles ---
+        function saveCustomLink() {
+            const name = document.getElementById('customName').value.trim();
+            let url = document.getElementById('customUrl').value.trim();
+
+            if (!name || !url) return alert("দয়া করে নাম এবং লিংক দিন!");
+            if (!url.startsWith('http')) url = 'https://' + url;
+
+            const newId = 'custom_' + Date.now();
+            newsData.unshift({ id: newId, name: name, url: url, category: 'custom' });
+            
+            localStorage.setItem('kabbo_news_db_v2', JSON.stringify(newsData));
+            
+            document.getElementById('customName').value = '';
+            document.getElementById('customUrl').value = '';
+            alert("নতুন লিংক সফলভাবে যুক্ত হয়েছে!");
+            
+            renderGrid(newsData, 'homeGrid');
+            renderGrid(newsData, 'searchGrid');
+            switchView('home', document.querySelector('.nav-item')); 
+        }
+
+        function saveProfile() {
+            const newName = document.getElementById('profileNameInput').value.trim();
+            if(newName) {
+                profileName = newName;
+                localStorage.setItem('kabbo_profile_name_v2', profileName);
+                document.getElementById('displayProfileName').innerText = profileName;
+                alert("প্রোফাইল আপডেট হয়েছে!");
+            }
+        }
+
+        function clearAppData() {
+            if(confirm("আপনার যুক্ত করা কাস্টম লিংক এবং ফেভারিট লিস্ট মুছে যাবে। নিশ্চিত?")) {
+                localStorage.removeItem('kabbo_news_db_v2');
+                localStorage.removeItem('kabbo_news_fav_v2');
+                newsData = initialDB;
+                favorites = [];
+                initApp();
+                alert("ডাটা রিসেট হয়েছে!");
+            }
+        }
+
+        // --- 7. Navigation Control ---
+        function switchView(viewName, navElement) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            navElement.classList.add('active');
+
+            const categoryNav = document.getElementById('categoryNav');
+            if(viewName === 'home') {
+                categoryNav.style.display = 'flex';
+            } else {
+                categoryNav.style.display = 'none';
+            }
+
+            if (viewName === 'search') document.getElementById('searchInput').focus();
+        }
+
+        // Boot up
+        function initApp() {
+            applySavedLayout();
+            document.getElementById('displayProfileName').innerText = profileName;
+            document.getElementById('profileNameInput').value = profileName;
+            renderGrid(newsData, 'homeGrid');
+            renderGrid(newsData, 'searchGrid');
+        }
+
+        window.onload = initApp;
+
+    </script>
+</body>
+</html>
