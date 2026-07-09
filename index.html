@@ -5,19 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>News Hub Pro | Kabbo</title>
     
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Kabbo Zine">
     <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=K&background=2563eb&color=fff&size=192">
     
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        
         :root {
             /* Default Blue Theme */
             --bg-gradient: linear-gradient(135deg, #e0eaf5 0%, #cfdef3 100%);
@@ -108,13 +105,11 @@
         /* --- News Layouts (Grid & List) --- */
         .news-container { padding: 15px 20px 110px 20px; transition: all 0.3s ease; }
         
-        /* Grid View Layout */
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
         .grid-view .news-card { flex-direction: column; text-align: center; padding: 15px; }
         .grid-view .news-logo { width: 55px; height: 55px; margin: 0 auto 10px auto; }
         .grid-view .card-actions { border-top: 1px solid rgba(0,0,0,0.05); margin-top: 10px; padding-top: 10px; width: 100%; justify-content: space-between; }
         
-        /* List View Layout */
         .list-view { display: flex; flex-direction: column; gap: 12px; }
         .list-view .news-card { flex-direction: row; text-align: left; padding: 12px 15px; align-items: center; gap: 15px; }
         .list-view .news-logo { width: 45px; height: 45px; margin: 0; flex-shrink: 0; }
@@ -123,7 +118,6 @@
         .list-view .card-actions { border-top: none; margin-top: 0; padding-top: 0; width: auto; gap: 15px; justify-content: flex-end; }
         .list-view .read-btn { display: none; }
 
-        /* Base Card Styling */
         .news-card {
             background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border); border-radius: 16px; display: flex;
@@ -152,14 +146,12 @@
         .profile-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
         .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #60a5fa); color: white; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; margin: 0 auto 15px auto; border: 4px solid white; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
 
-        /* Color Picker */
         .color-picker { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
         .color-dot { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; }
         .color-dot.active { border-color: var(--text-main); transform: scale(1.15); }
         .bg-blue { background: #2563eb; } .bg-green { background: #16a34a; } .bg-yellow { background: #ca8a04; }
         .bg-red { background: #dc2626; } .bg-purple { background: #9333ea; } .bg-dark { background: #1e293b; } .bg-gradient { background: linear-gradient(135deg, #ec4899, #f43f5e); }
 
-        /* Backup Card */
         .backup-card { background: var(--glass-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); margin-top: 5px; }
 
         /* --- Header Radio Modal --- */
@@ -183,6 +175,28 @@
         .radio-ctrl-btn:active { transform: scale(0.9); }
         .radio-play-btn { background: var(--primary); color: white; border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.8rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transition: 0.2s; cursor: pointer; }
         .radio-play-btn:active { transform: scale(0.95); }
+
+        /* --- Dynamic 15-Bar EQ Visualizer --- */
+        .eq-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 4px;
+            height: 40px;
+            margin: -5px auto 15px auto;
+            opacity: 0; 
+            transition: opacity 0.3s ease;
+        }
+        .eq-container.playing {
+            opacity: 1; 
+        }
+        .eq-bar {
+            width: 5px;
+            background: var(--danger); 
+            border-radius: 3px 3px 0 0;
+            height: 5px; 
+            transition: height 0.15s ease-out; 
+        }
 
         /* --- Bottom Navigation --- */
         .bottom-nav {
@@ -343,18 +357,43 @@
                 <i class="fa-solid fa-xmark" style="font-size: 1.5rem; cursor: pointer; color: var(--text-muted);" onclick="toggleRadioModal()"></i>
             </div>
             
-            <img id="radioSyncImage" src="https://ui-avatars.com/api/?name=DFM&background=2563eb&color=fff&size=200" class="radio-img" alt="Radio Station">
-            <h4 id="radioStationName" style="color: var(--text-main); margin-bottom: 15px; font-size: 1.2rem;">Dhaka FM</h4>
+            <img id="radioSyncImage" src="https://ui-avatars.com/api/?name=Loading&background=2563eb&color=fff&size=200" class="radio-img" alt="Radio Station">
+            <h4 id="radioStationName" style="color: var(--text-main); margin-bottom: 15px; font-size: 1.2rem;">Loading...</h4>
             
-            <select id="radioStationSelect" class="custom-input" style="width: 100%; margin-bottom: 20px; padding: 12px; font-weight: 600;" onchange="changeStationSelect()">
-                <option value="0">Dhaka FM</option>
-                <option value="1">Radio Today</option>
-                <option value="2">Shadhin Radio</option>
-                <option value="3">Radio Bushra</option>
-                <option value="4">Radio Gungun</option>
-                <option value="5">Radio Jamuna</option>
-                <option value="6">Radio Sondhi</option>
-            </select>
+            <!-- Dynamic 15-Bar Music Wave -->
+            <div class="eq-container" id="musicEQ">
+                <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+                <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+                <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+                <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+                <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+            </div>
+            
+            <select id="radioStationSelect" class="custom-input" style="width: 100%; margin-bottom: 20px; padding: 12px; font-weight: 600;" onchange="changeStationSelect()"></select>
+
+            <!-- Volume Slider -->
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.03); padding: 10px 15px; border-radius: 12px;">
+                <i class="fa-solid fa-volume-low" style="color: var(--text-muted); font-size: 0.9rem;"></i>
+                <input type="range" id="radioVolume" min="0" max="1" step="0.05" value="1" style="flex: 1; accent-color: var(--primary); cursor: pointer;">
+                <i class="fa-solid fa-volume-high" style="color: var(--text-muted); font-size: 0.9rem;"></i>
+            </div>
+
+            <!-- Sleep Timer -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(0,0,0,0.03); padding: 10px 15px; border-radius: 12px;">
+                <span style="color: var(--text-main); font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-bed" style="color: var(--primary);"></i> স্লিপ টাইমার
+                </span>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="sleepTimerDisplay" style="color: var(--danger); font-weight: bold; font-size: 0.85rem; display: none;">00:00</span>
+                    <select id="sleepTimerSelect" class="custom-input" style="padding: 4px 8px; width: auto; font-size: 0.8rem; border-radius: 8px;" onchange="setSleepTimer()">
+                        <option value="0">বন্ধ</option>
+                        <option value="15">১৫ মিনিট</option>
+                        <option value="30">৩০ মিনিট</option>
+                        <option value="45">৪৫ মিনিট</option>
+                        <option value="60">৬০ মিনিট</option>
+                    </select>
+                </div>
+            </div>
 
             <div class="radio-controls-main">
                 <button class="radio-ctrl-btn" onclick="prevStation()"><i class="fa-solid fa-backward-step"></i></button>
@@ -655,7 +694,7 @@
             { id: "254", name: "LEPVMBJ Books", url: "http://www.lepvmbj.org/book", category: "veterinary" }
         ];
 
-        // --- 2. State Management (Version 5 for clean setup) ---
+        // --- 2. State Management ---
         let newsData = JSON.parse(localStorage.getItem('kabbo_news_db_v5')) || initialDB;
         let favorites = JSON.parse(localStorage.getItem('kabbo_news_fav_v5')) || [];
         let profileName = localStorage.getItem('kabbo_profile_name_v5') || "Kabbo";
@@ -724,44 +763,70 @@
         }
 
         function renderGrid(dataToRender, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            
-            if (dataToRender.length === 0) {
-                container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); margin-top:30px;">কোনো ডাটা পাওয়া যায়নি।</p>`;
-                return;
-            }
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    
+    if (dataToRender.length === 0) {
+        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); margin-top:30px;">কোনো ডাটা পাওয়া যায়নি।</p>`;
+        return;
+    }
 
-            dataToRender.forEach(news => {
-                const isFav = favorites.includes(news.id);
-                const logoUrl = getFaviconURL(news.url);
-                const cleanUrl = news.url.replace(/^https?:\/\//, '').replace(/^www\./, '');
-                
-                const card = document.createElement('div');
-                card.className = 'news-card';
-                card.onclick = (e) => {
-                    if(!e.target.closest('.action-btn')) window.open(news.url, '_blank');
-                };
+    dataToRender.forEach(news => {
+        const isFav = favorites.includes(news.id);
+        const logoUrl = getFaviconURL(news.url);
+        const isCustom = news.id.startsWith('custom_'); 
+        
+        const card = document.createElement('div');
+        card.className = 'news-card';
+        card.onclick = (e) => {
+            if(!e.target.closest('.action-btn')) window.open(news.url, '_blank');
+        };
 
-                card.innerHTML = `
-                    <img src="${logoUrl}" alt="logo" class="news-logo" onerror="this.onerror=null; this.src='${generateFallbackAvatar(news.name)}';">
-                    <div class="card-content">
-                        <div class="news-title">${news.name}</div>
-                        <div class="news-url">${cleanUrl}</div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="action-btn ${isFav ? 'fav' : ''}" onclick="toggleFav('${news.id}', event)">
-                            <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
-                        </button>
-                        <button class="action-btn" onclick="shareWeb('${news.name}', '${news.url}', event)" style="margin-left: 10px;">
-                            <i class="fa-solid fa-share-nodes"></i>
-                        </button>
-                        <button class="read-btn" onclick="window.open('${news.url}', '_blank')">ভিজিট</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
+        card.innerHTML = `
+            <img src="${logoUrl}" alt="logo" class="news-logo" onerror="this.onerror=null; this.src='${generateFallbackAvatar(news.name)}';">
+            <div class="card-content">
+                <div class="news-title">${news.name}</div>
+                <div class="news-url">${news.url.replace(/^https?:\/\//, '').replace(/^www\./, '')}</div>
+            </div>
+            <div class="card-actions">
+                ${isCustom ? `
+                    <button class="action-btn" onclick="editCustomLink('${news.id}', event)"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="action-btn" onclick="deleteCustomLink('${news.id}', event)" style="color:var(--danger)"><i class="fa-solid fa-trash"></i></button>
+                ` : ''}
+                <button class="action-btn" onclick="shareWeb('${news.name}', '${news.url}', event)">
+                    <i class="fa-solid fa-share-nodes"></i>
+                </button>
+                <button class="action-btn ${isFav ? 'fav' : ''}" onclick="toggleFav('${news.id}', event)">
+                    <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+        
+        function deleteCustomLink(id, event) {
+    event.stopPropagation();
+    if(confirm("এই লিংকটি কি মুছে ফেলতে চান?")) {
+        newsData = newsData.filter(n => n.id !== id);
+        localStorage.setItem('kabbo_news_db_v5', JSON.stringify(newsData));
+        initApp(); // পুরো অ্যাপ রি-ফ্রেশ করবে
+    }
+}
+
+function editCustomLink(id, event) {
+    event.stopPropagation();
+    const item = newsData.find(n => n.id === id);
+    const newName = prompt("নতুন নাম দিন:", item.name);
+    const newUrl = prompt("নতুন URL দিন:", item.url);
+    
+    if (newName && newUrl) {
+        item.name = newName;
+        item.url = newUrl.startsWith('http') ? newUrl : 'https://' + newUrl;
+        localStorage.setItem('kabbo_news_db_v5', JSON.stringify(newsData));
+        initApp();
+    }
+}
 
         // --- 6. Core Functions ---
         function filterCategory(cat, btnElement) {
@@ -791,8 +856,6 @@
                 favorites.push(id);
             }
             localStorage.setItem('kabbo_news_fav_v5', JSON.stringify(favorites));
-            
-            // Re-render active views
             filterCategory(currentCategory, document.querySelector('#categoryNav .tab-btn.active'));
             renderFavorites();
             if(document.getElementById('searchInput').value !== "") handleSearch();
@@ -898,29 +961,90 @@
             }
         }
 
-        // --- 8. Header Radio Logic (Prev/Next/Sync Image) ---
+        // --- 8. Header Radio Logic & Advanced Features ---
         const radioStationsData = [
-            { name: "Dhaka FM", url: "https://stream.zeno.fm/u9mphfk604zuv", img: "https://ui-avatars.com/api/?name=DFM&background=2563eb&color=fff&size=200" },
-            { name: "Radio Today", url: "https://stream-285.surfernetwork.com/0zha3rfq02quv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiIwemhhM3JmcTAycXV2IiwiaG9zdCI6InN0cmVhbS0yODUuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6IjlsNkZEX3pfU3RLLUpzN3dHSThNUFEiLCJpYXQiOjE3ODM1NzQ5NzcsImV4cCI6MTc4MzU3NTAzN30.JG-9ndA8U_TJXC5Ale0_ohKciHpnx4d0ua_C8zH9B8Q", img: "https://ui-avatars.com/api/?name=RT&background=16a34a&color=fff&size=200" },
-            { name: "Shadhin Radio", url: "https://stream.zeno.fm/avxwtgyxubwtv", img: "https://ui-avatars.com/api/?name=SR&background=dc2626&color=fff&size=200" },
-            { name: "Radio Bushra", url: "https://stream.zeno.fm/u9mphfk604zuv", img: "https://ui-avatars.com/api/?name=RB&background=ca8a04&color=fff&size=200" },
-            { name: "Radio Gungun", url: "https://audio.streamcast.xyz/radio/8000/radio.mp3", img: "https://ui-avatars.com/api/?name=RG&background=9333ea&color=fff&size=200" },
-            { name: "Radio Jamuna", url: "https://stream.zeno.fm/pcmmlmkpvmmvv", img: "https://ui-avatars.com/api/?name=RJ&background=1e293b&color=fff&size=200" },
-            { name: "Radio Sondhi", url: "https://stream.zeno.fm/pcmmlmkpvmmvv", img: "https://ui-avatars.com/api/?name=RS&background=f97316&color=fff&size=200" }
+            { name: "Bangladesh Beter", url: "http://as3.digitalsynapsebd.com:8582/;", img: "" },
+            { name: "Radio Today", url: "https://stream.zeno.fm/0zha3rfq02quv", img: "" },
+            { name: "Radio Foorti", url: "https://stream.zeno.fm/cs298e2w34zuv", img: "" },
+            { name: "Radio Shadhin", url: "https://stream-281.surfernetwork.com/avxwtgyxubwtv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJhdnh3dGd5eHVid3R2IiwiaG9zdCI6InN0cmVhbS0yODEuc3VyZmVybmV0d29yay5jb20iLCJydHRsIjo1LCJqdGkiOiJmTE5ONFNJMVQ3NldaWHpmS1dyeFFRIiwiaWF0IjoxNzgzNTkwOTIyLCJleHAiOjE3ODM1OTA5ODJ9.taxYcv5P2AmSUQlnnQxddB4W9_Wu0v_GXBDk8b047ZA", img: "" },
+            { name: "Radio Padma 99.2 FM", url: "https://radiopadmabd.radioca.st/radiopadma/;", img: "" },
+            { name: "Peoples Radio 91.6", url: "https://s3.myradiostream.com:14498/listen.mp3", img: "" },
+            { name: "Radio 19", url: "https://stream.zeno.fm/3bl4vr9m5p2uv", img: "" },
+            { name: "Beter Rangpur", url: "https://stream-179.surfernetwork.com/kdksf0gtef9uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJrZGtzZjBndGVmOXV2IiwiaG9zdCI6InN0cmVhbS0xNzkuc3VyZmVybmV0d29yay5jb20iLCJydHRsIjo1LCJqdGkiOiI5T3hrMmEwalFNbWtmS3QyOE1tMWxRIiwiaWF0IjoxNzgzNTkxMTU3LCJleHAiOjE3ODM1OTEyMTd9.UU9Z47gCrqGXP2NJi2XnO-BZsgmQooYJCLnrIyXVboo", img: "" },
+            { name: "Radio SV", url: "https://stream-178.surfernetwork.com/jvvdhwuuezvvv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJqdnZkaHd1dWV6dnZ2IiwiaG9zdCI6InN0cmVhbS0xNzguc3VyZmVybmV0d29yay5jb20iLCJydHRsIjo1LCJqdGkiOiJwVXJYQjNEblRYcU0wbWRmV3A0Z3hnIiwiaWF0IjoxNzgzNTkwMDcyLCJleHAiOjE3ODM1OTAxMzJ9.L_USW5EVnvzKf4t1PtNi55MS8kKkzGCzl5Ypkn8jQNk", img: "" },
+            { name: "Dhaka FM", url: "https://stream-289.surfernetwork.com/u9mphfk604zuv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJ1OW1waGZrNjA0enV2IiwiaG9zdCI6InN0cmVhbS0yODkuc3VyZmVybmV0d29yay5jb20iLCJydHRsIjo1LCJqdGkiOiJXYXNjajctUFFULXB0d3RjQWI1ZHdRIiwiaWF0IjoxNzgzNTkwMTUxLCJleHAiOjE3ODM1OTAyMTF9.J2gYfuJTi5a6t5AqWJOiKPqKPZC0HJXnuYVJb7rYNL4", img: "" },
+            { name: "Radio Bhumi 92.80", url: "https://stream.zeno.fm/ybf1umk1k18uv", img: "" },
+            { name: "BU Radio", url: "https://stream-177.surfernetwork.com/x3wb4hevj5atv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJ4M3diNGhldmo1YXR2IiwiaG9zdCI6InN0cmVhbS0xNzcuc3VyZmVybmV0d29yay5jb20iLCJydHRsIjo1LCJqdGkiOiJvRkxkdWNOZ1FBbVFtM1BFVnBoVy13IiwiaWF0IjoxNzgzNTkxMTk0LCJleHAiOjE3ODM1OTEyNTR9.eh51f-ybtwsXn7KjYmSESoJHci_wBlEOMtwnOsPRy_g", img: "" },
+            { name: "Radio Bushra", url: "https://stream.zeno.fm/mzuka1fdxzzuv", img: "" },
+            { name: "Radio Dawha Bangla", url: "https://stream.zeno.fm/rzkykmse9zcuv", img: "" },
+            { name: "Dawateislami Bangla", url: "https://stream.zeno.fm/pwmqnkyvt98uv", img: "" },
+            { name: "Radio Dhoni", url: "https://stream-177.surfernetwork.com/2yihdjutno9tv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiIyeWloZGp1dG5vOXR2IiwiaG9zdCI6InN0cmVhbS0xNzcuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6InI3RGJ5SGpzUWQtcy1oNEZqUy1wRmciLCJpYXQiOjE3ODM1OTEzMjMsImV4cCI6MTc4MzU5MTM4M30.igd3Li18nXfVPzGo1zu1FD4KjEMrDxqgBpkFWSYptdg", img: "" },
+            { name: "Radio Euphonia", url: "https://stream.zeno.fm/risgdzpf1cxtv", img: "" },
+            { name: "Radio GunGun", url: "https://audio.streamcast.xyz/radio/8000/radio.mp3", img: "" },
+            { name: "Indo West Indian Tunes", url: "https://s2.myradiostream.com:29270/;", img: "" },
+            { name: "Radio Jamuna", url: "https://stream.zeno.fm/pcmmlmkpvmmvv", img: "" },
+            { name: "Nex Radio", url: "https://stream-179.surfernetwork.com/cgxp9m3uxhhvv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJjZ3hwOW0zdXhoaHZ2IiwiaG9zdCI6InN0cmVhbS0xNzkuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6IjczeWFNbWg2U0ZHV2ZKdnI1QWNQTlEiLCJpYXQiOjE3ODM1OTE4NzQsImV4cCI6MTc4MzU5MTkzNH0.oodZi9leb3z4LwZElM0vnA4vKYZO1b5wUXqrEHabl64", img: "" },
+            { name: "Radio Sondhi", url: "https://stream-176.surfernetwork.com/e35pzesopreuv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJlMzVwemVzb3ByZXV2IiwiaG9zdCI6InN0cmVhbS0xNzYuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6Im4zVFZ0V212UmhTN2ZjS1Q5SXBSUkEiLCJpYXQiOjE3ODM1OTE5MjUsImV4cCI6MTc4MzU5MTk4NX0.CBUWX6aBTNjToVV-FpseZaVnkn4xJZQql9ujbB7mDsE", img: "" },
+            { name: "Radio Payra", url: "https://stream-175.surfernetwork.com/benwxhpuhueuv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJiZW53eGhwdWh1ZXV2IiwiaG9zdCI6InN0cmVhbS0xNzUuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6ImhvWDc4OVJYVFZHN3JQYTdDNWZWZFEiLCJpYXQiOjE3ODM1OTE5NjUsImV4cCI6MTc4MzU5MjAyNX0.bXhszrSlUcsn1psamdpA-VdSdRzWT-oeF6lkZQ3EO6I", img: "" },
+            { name: "Peoples Radio Limited", url: "https://stream-175.surfernetwork.com/ocgdtpw53p2uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJvY2dkdHB3NTNwMnV2IiwiaG9zdCI6InN0cmVhbS0xNzUuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6IlhmX1I0bGRqUTZpQy1FNU9RMHI3NFEiLCJpYXQiOjE3ODM1OTIwMDQsImV4cCI6MTc4MzU5MjA2NH0.EK7RUlTZd3z85o_WEC_n7jjYxXDhpwNvMbbbW7hFLMM", img: "" },
+            { name: "Radio Purbakantho", url: "https://stream-177.surfernetwork.com/6nuqpxcw81zuv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiI2bnVxcHhjdzgxenV2IiwiaG9zdCI6InN0cmVhbS0xNzcuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6IjlTR2RUdFp1UzR5Y3dVZER6Q0liUUEiLCJpYXQiOjE3ODM1OTIwNDcsImV4cCI6MTc4MzU5MjEwN30.biUNt3yhWAfF6_VNc3l8BDbHWn1ExdYwj2Q7BNjsXTo", img: "" },
+            { name: "Rajshahi FM", url: "https://stream-179.surfernetwork.com/nxfshdayjrdvv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJueGZzaGRheWpyZHZ2IiwiaG9zdCI6InN0cmVhbS0xNzkuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6Im9GQlo3WUtQUmoyUVUzamZBRXZ2YlEiLCJpYXQiOjE3ODM1OTIxMDQsImV4cCI6MTc4MzU5MjE2NH0.1cGZ8rGzXMPDdBDLDiFlaBQARd9wYJDKuZxZCx1O8VQ", img: "" },
+            { name: "Relaks Radio Bangla", url: "https://s3.voscast.com:9893/live", img: "" },
+            { name: "Ruqyah Radio", url: "https://stream-175.surfernetwork.com/pz72fq579f0uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJwejcyZnE1NzlmMHV2IiwiaG9zdCI6InN0cmVhbS0xNzUuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6Im5Sa1RSLXlLVHVTMV9yZGVWUjEwTFEiLCJpYXQiOjE3ODM1OTIyMjgsImV4cCI6MTc4MzU5MjI4OH0._2CpMxC6OsOTXMOGz32-CnuMpV1p5aGFY2mGLiB4L_0", img: "" },
+            { name: "Sakib FM", url: "https://stream-175.surfernetwork.com/sg1hy1wdlcavv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJzZzFoeTF3ZGxjYXZ2IiwiaG9zdCI6InN0cmVhbS0xNzUuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6ImN3YTRkUVNSUjRDM1htRWhnQ0Y4N1EiLCJpYXQiOjE3ODM1OTIyNzcsImV4cCI6MTc4MzU5MjMzN30.8NbbOWI99SCa_ngKo4NsdTI8TYI0kkIqyZG_QUf4R2k", img: "" },
+            { name: "Radio Theater Bangla", url: "https://stream-281.surfernetwork.com/hrawdb5yx8ovv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJocmF3ZGI1eXg4b3Z2IiwiaG9zdCI6InN0cmVhbS0yODEuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6IjlIMW81TVVyVGMtQmhMUHdHejFKRkEiLCJpYXQiOjE3ODM1OTI0NTMsImV4cCI6MTc4MzU5MjUxM30.BB7Vakl85euV0YEsbBcLQNwpEQCV8TBMRrdKLRbeZqg", img: "" },
+            { name: "Radio Ullash", url: "https://stream-178.surfernetwork.com/gpgkgp9mp18uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJncGdrZ3A5bXAxOHV2IiwiaG9zdCI6InN0cmVhbS0xNzguc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6IldIN3gxcnNLU0htM0wzYkp1S01TTlEiLCJpYXQiOjE3ODM1OTI1NDIsImV4cCI6MTc4MzU5MjYwMn0.bx26ykx2rYqbybBtB35c3GfPcjISRyc4Ino-Cebqu3k", img: "" },
+            { name: "Radio Vivid Voice", url: "https://stream-286.surfernetwork.com/xuin6ocdc2juv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJ4dWluNm9jZGMyanV2IiwiaG9zdCI6InN0cmVhbS0yODYuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6ImoxdjRmWFU5UzcyN00xZHF5TGo3V1EiLCJpYXQiOjE3ODM1OTI2NjQsImV4cCI6MTc4MzU5MjcyNH0.mRJ2CdRbm_5qqo3RGSd_Vj7PvOT0MU3vFj3YChvuDzY", img: "" }
         ];
 
         let currentStationIndex = 0;
         let isRadioPlaying = false;
         const radioAudio = document.getElementById('radioAudio');
+        let eqInterval;
+        let sleepTimerTimeout;
+        let sleepTimerInterval;
 
         function toggleRadioModal() {
             const overlay = document.getElementById('radioOverlay');
             overlay.classList.toggle('show');
         }
 
+        // --- Dynamic Wave Engine ---
+        function startEQ() {
+            const eqBars = document.querySelectorAll('.eq-bar');
+            document.getElementById('musicEQ').classList.add('playing');
+            
+            if (eqInterval) clearInterval(eqInterval);
+            
+            eqInterval = setInterval(() => {
+                eqBars.forEach((bar, index) => {
+                    let maxH = 40; 
+                    if (index < 4 || index > 10) maxH = 20; 
+                    let newHeight = Math.floor(Math.random() * (maxH - 5 + 1)) + 5;
+                    bar.style.height = newHeight + 'px';
+                });
+            }, 150);
+        }
+
+        function stopEQ() {
+            if (eqInterval) clearInterval(eqInterval);
+            document.getElementById('musicEQ').classList.remove('playing');
+            document.querySelectorAll('.eq-bar').forEach(bar => {
+                bar.style.height = '5px';
+            });
+        }
+
         function updateRadioUI() {
             const station = radioStationsData[currentStationIndex];
-            document.getElementById('radioSyncImage').src = station.img;
+            let finalLogoUrl = station.img;
+            
+            // Auto Logo Logic
+            if (!finalLogoUrl) {
+                let initials = station.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                finalLogoUrl = `https://ui-avatars.com/api/?name=${initials}&background=2563eb&color=fff&size=200`;
+            }
+            
+            document.getElementById('radioSyncImage').src = finalLogoUrl;
             document.getElementById('radioStationName').innerText = station.name;
             document.getElementById('radioStationSelect').value = currentStationIndex;
             radioAudio.src = station.url;
@@ -928,6 +1052,27 @@
             if (isRadioPlaying) {
                 radioAudio.play().catch(()=>{});
                 document.getElementById('headerRadioBtn').classList.add('radio-pulse');
+                startEQ(); 
+            } else {
+                stopEQ();
+            }
+
+            // Media Session API (Lock-screen Controls)
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: station.name,
+                    artist: 'Kabbo Zine Radio',
+                    album: 'Live Stream',
+                    artwork: [
+                        { src: finalLogoUrl, sizes: '192x192', type: 'image/png' },
+                        { src: finalLogoUrl, sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+
+                navigator.mediaSession.setActionHandler('play', () => { togglePlay(); });
+                navigator.mediaSession.setActionHandler('pause', () => { togglePlay(); });
+                navigator.mediaSession.setActionHandler('previoustrack', () => { prevStation(); });
+                navigator.mediaSession.setActionHandler('nexttrack', () => { nextStation(); });
             }
         }
 
@@ -956,17 +1101,55 @@
                 radioAudio.pause();
                 playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
                 headerBtn.classList.remove('radio-pulse');
+                stopEQ(); 
                 isRadioPlaying = false;
             } else {
                 playBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
                 radioAudio.play().then(() => {
                     playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                     headerBtn.classList.add('radio-pulse');
+                    startEQ(); 
                     isRadioPlaying = true;
                 }).catch(() => {
                     alert("স্ট্রিমিং শুরু করতে সমস্যা হচ্ছে। ইন্টারনেট কানেকশন চেক করুন।");
                     playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                    stopEQ();
                 });
+            }
+        }
+
+        // --- Sleep Timer Logic ---
+        function setSleepTimer() {
+            const minutes = parseInt(document.getElementById('sleepTimerSelect').value);
+            const display = document.getElementById('sleepTimerDisplay');
+            
+            clearTimeout(sleepTimerTimeout);
+            clearInterval(sleepTimerInterval);
+            display.style.display = 'none';
+
+            if (minutes > 0) {
+                let timeLeft = minutes * 60; 
+                display.style.display = 'inline';
+                
+                sleepTimerInterval = setInterval(() => {
+                    timeLeft--;
+                    let m = Math.floor(timeLeft / 60);
+                    let s = timeLeft % 60;
+                    display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(sleepTimerInterval);
+                    }
+                }, 1000);
+
+                sleepTimerTimeout = setTimeout(() => {
+                    if (isRadioPlaying) {
+                        togglePlay(); 
+                        alert("স্লিপ টাইমার অনুযায়ী রেডিও বন্ধ করা হয়েছে। শুভরাত্রি!");
+                    }
+                    document.getElementById('sleepTimerSelect').value = "0";
+                    display.style.display = 'none';
+                }, minutes * 60 * 1000);
             }
         }
 
@@ -975,95 +1158,106 @@
             applySavedTheme();
             applySavedLayout();
             updateCategoryCounts();
+            
             document.getElementById('displayProfileName').innerText = profileName;
             document.getElementById('profileNameInput').value = profileName;
+            
             renderGrid(newsData, 'homeGrid');
             renderGrid(newsData, 'searchGrid');
             renderFavorites();
+
+            const radioSelect = document.getElementById('radioStationSelect');
+            radioSelect.innerHTML = ''; 
+            radioStationsData.forEach((station, index) => {
+                let opt = document.createElement('option');
+                opt.value = index;
+                opt.innerText = station.name;
+                radioSelect.appendChild(opt);
+            });
+            
+            updateRadioUI();
+
+            // Volume Control Event Listener
+            const volumeSlider = document.getElementById('radioVolume');
+            volumeSlider.addEventListener('input', (e) => {
+                radioAudio.volume = e.target.value;
+            });
         }
 
         window.onload = initApp;
         
-        <!-- Single File PWA Logic (Blob Magic) -->
-        
-    // ১. ডায়নামিক Manifest.json তৈরি
-    const manifestData = {
-        "name": "News Hub Pro",
-        "short_name": "Kabbo Zine",
-        "description": "Your ultimate daily news and radio hub.",
-        "start_url": window.location.href, // বর্তমান ইউআরএল অটোমেটিক নিয়ে নিবে
-        "display": "standalone",
-        "background_color": "#e0eaf5",
-        "theme_color": "#2563eb",
-        "orientation": "portrait",
-        "icons": [
-            {
-                "src": "https://ui-avatars.com/api/?name=K&background=2563eb&color=fff&size=192",
-                "sizes": "192x192",
-                "type": "image/png"
-            },
-            {
-                "src": "https://ui-avatars.com/api/?name=K&background=2563eb&color=fff&size=512",
-                "sizes": "512x512",
-                "type": "image/png"
-            }
-        ]
-    };
+        // ১. ডায়নামিক Manifest.json তৈরি
+        const manifestData = {
+            "name": "News Hub Pro",
+            "short_name": "Kabbo Zine",
+            "description": "Your ultimate daily news and radio hub.",
+            "start_url": window.location.href, 
+            "display": "standalone",
+            "background_color": "#e0eaf5",
+            "theme_color": "#2563eb",
+            "orientation": "portrait",
+            "icons": [
+                {
+                    "src": "https://ui-avatars.com/api/?name=K&background=2563eb&color=fff&size=192",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://ui-avatars.com/api/?name=K&background=2563eb&color=fff&size=512",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
 
-    // ম্যানিফেস্ট ফাইল ইনজেক্ট করা
-    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
-    const manifestUrl = URL.createObjectURL(manifestBlob);
-    const manifestLink = document.createElement('link');
-    manifestLink.rel = 'manifest';
-    manifestLink.href = manifestUrl;
-    document.head.appendChild(manifestLink);
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = manifestUrl;
+        document.head.appendChild(manifestLink);
 
-    // ২. ডায়নামিক Service Worker (sw.js) তৈরি
-    const swCode = `
-        const CACHE_NAME = 'kabbo-news-hub-v5';
-        
-        self.addEventListener('install', event => {
-            self.skipWaiting();
-            console.log('Service Worker Installed via Blob!');
+        // ২. ডায়নামিক Service Worker (sw.js) তৈরি
+        const swCode = `
+            const CACHE_NAME = 'kabbo-news-hub-v5';
+            
+            self.addEventListener('install', event => {
+                self.skipWaiting();
+                console.log('Service Worker Installed via Blob!');
+            });
+            
+            self.addEventListener('activate', event => {
+                event.waitUntil(clients.claim());
+            });
+            
+            self.addEventListener('fetch', event => {
+                event.respondWith(
+                    fetch(event.request).catch(() => {
+                        return new Response('<h2 style="text-align:center;font-family:sans-serif;margin-top:20px;">No Internet Connection</h2>', {
+                            headers: { 'Content-Type': 'text/html' }
+                        });
+                    })
+                );
+            });
+        `;
+
+        const swBlob = new Blob([swCode], { type: 'text/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register(swUrl)
+                    .then(reg => console.log('Single File PWA Registered! Scope:', reg.scope))
+                    .catch(err => console.log('PWA Registration Failed:', err));
+            });
+        }
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('App is ready to be installed!');
         });
-        
-        self.addEventListener('activate', event => {
-            event.waitUntil(clients.claim());
-        });
-        
-        self.addEventListener('fetch', event => {
-            // বেসিক অফলাইন সাপোর্ট লজিক
-            event.respondWith(
-                fetch(event.request).catch(() => {
-                    return new Response('<h2 style="text-align:center;font-family:sans-serif;margin-top:20px;">No Internet Connection</h2>', {
-                        headers: { 'Content-Type': 'text/html' }
-                    });
-                })
-            );
-        });
-    `;
-
-    // Service Worker ইনজেক্ট করা
-    const swBlob = new Blob([swCode], { type: 'text/javascript' });
-    const swUrl = URL.createObjectURL(swBlob);
-
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register(swUrl)
-                .then(reg => console.log('Single File PWA Registered! Scope:', reg.scope))
-                .catch(err => console.log('PWA Registration Failed:', err));
-        });
-    }
-
-    // "Add to Home Screen" প্রম্পট ইভেন্ট হ্যান্ডলার
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        console.log('App is ready to be installed!');
-        // আপনি চাইলে এখানে নিজের ডিজাইন করা একটি "Install App" বাটন ট্রিগার করতে পারেন
-    });
-
     </script>
 </body>
 </html>
