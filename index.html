@@ -4,11 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>News Hub Pro | Kabbo</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Kabbo Zine">
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=K&background=2563eb&color=fff&size=192">
+    
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
+        
         :root {
+            /* Default Blue Theme */
             --bg-gradient: linear-gradient(135deg, #e0eaf5 0%, #cfdef3 100%);
             --glass-bg: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(255, 255, 255, 0.9);
@@ -20,6 +31,22 @@
             --nav-bg: rgba(255, 255, 255, 0.95);
         }
 
+        /* --- Theme Variables --- */
+        body.theme-green { --primary: #16a34a; --primary-light: #22c55e; --bg-gradient: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); }
+        body.theme-yellow { --primary: #ca8a04; --primary-light: #eab308; --bg-gradient: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%); }
+        body.theme-red { --primary: #dc2626; --primary-light: #ef4444; --bg-gradient: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); }
+        body.theme-purple { --primary: #9333ea; --primary-light: #a855f7; --bg-gradient: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
+        body.theme-dark { 
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
+            --glass-bg: rgba(30, 41, 59, 0.75); 
+            --glass-border: rgba(255, 255, 255, 0.1); 
+            --text-main: #f8fafc; 
+            --text-muted: #cbd5e1; 
+            --primary: #3b82f6; 
+            --nav-bg: rgba(15, 23, 42, 0.95); 
+        }
+        body.theme-gradient { --primary: #ec4899; --primary-light: #f43f5e; --bg-gradient: linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%); }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Noto Serif Bengali', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body { 
@@ -30,6 +57,7 @@
             flex-direction: column;
             overflow-x: hidden;
             background-attachment: fixed;
+            transition: background 0.3s ease;
         }
 
         /* --- UI Views --- */
@@ -37,40 +65,36 @@
         .view-section.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- Sticky Top Container (Overlap Bug Fixed) --- */
+        /* --- Sticky Top Container --- */
         .top-sticky-container {
-            position: sticky;
-            top: 0;
-            z-index: 1000; /* Increased z-index to keep it strictly on top */
-            background: rgba(255, 255, 255, 0.95); /* More solid background to hide scrolling cards */
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-bottom: 1px solid var(--glass-border);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 1000;
+            background: var(--nav-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid var(--glass-border); box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         /* --- Header --- */
-        .app-header {
-            padding: 15px 20px; 
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .app-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .app-title { font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         
         .header-actions { display: flex; gap: 15px; align-items: center; }
         .icon-btn { background: transparent; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
         .icon-btn:active { transform: scale(0.9); }
+        .radio-pulse { color: var(--primary); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
         /* --- Category Tabs --- */
-        .category-nav {
-            display: flex; gap: 10px; padding: 0 20px 15px 20px; overflow-x: auto; scrollbar-width: none;
-        }
+        .category-nav { display: flex; gap: 10px; padding: 0 20px 15px 20px; overflow-x: auto; scrollbar-width: none; }
         .category-nav::-webkit-scrollbar { display: none; }
         .tab-btn {
             background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 8px 20px;
             border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
             cursor: pointer; white-space: nowrap; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex; gap: 5px; align-items: center;
         }
-        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        .tab-btn .count-badge { background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .tab-btn.active .count-badge { background: rgba(255,255,255,0.2); color: white; }
 
         /* --- Universal Search --- */
         .search-container { padding: 15px 20px; }
@@ -82,23 +106,21 @@
         .search-box input { border: none; background: transparent; width: 100%; outline: none; font-size: 1rem; color: var(--text-main); }
 
         /* --- News Layouts (Grid & List) --- */
-        /* Fixed Bottom Overlap by adding 110px padding-bottom here */
         .news-container { padding: 15px 20px 110px 20px; transition: all 0.3s ease; }
         
         /* Grid View Layout */
-        .news-container.grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
         .grid-view .news-card { flex-direction: column; text-align: center; padding: 15px; }
         .grid-view .news-logo { width: 55px; height: 55px; margin: 0 auto 10px auto; }
         .grid-view .card-actions { border-top: 1px solid rgba(0,0,0,0.05); margin-top: 10px; padding-top: 10px; width: 100%; justify-content: space-between; }
         
         /* List View Layout */
-        .news-container.list-view { display: flex; flex-direction: column; gap: 12px; }
+        .list-view { display: flex; flex-direction: column; gap: 12px; }
         .list-view .news-card { flex-direction: row; text-align: left; padding: 12px 15px; align-items: center; gap: 15px; }
         .list-view .news-logo { width: 45px; height: 45px; margin: 0; flex-shrink: 0; }
         .list-view .card-content { flex: 1; overflow: hidden; }
         .list-view .news-title { font-size: 1rem; -webkit-line-clamp: 1; }
         .list-view .card-actions { border-top: none; margin-top: 0; padding-top: 0; width: auto; gap: 15px; justify-content: flex-end; }
-        .list-view .action-btn { font-size: 1.2rem; }
         .list-view .read-btn { display: none; }
 
         /* Base Card Styling */
@@ -106,7 +128,7 @@
             background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border); border-radius: 16px; display: flex;
             box-shadow: 0 4px 15px rgba(0,0,0,0.04); transition: transform 0.2s, background 0.2s; cursor: pointer;
-            z-index: 1; /* Keep cards below sticky header */
+            z-index: 1;
         }
         .news-card:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.9); }
         
@@ -123,64 +145,97 @@
         .form-container, .profile-container { padding: 20px 20px 110px 20px; display: flex; flex-direction: column; gap: 15px; }
         .input-group { display: flex; flex-direction: column; gap: 5px; }
         .input-group label { font-size: 0.85rem; font-weight: 600; color: var(--primary); }
-        .custom-input { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 14px; border-radius: 12px; outline: none; font-size: 0.95rem; color: var(--text-main); }
-        .main-btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); transition: 0.2s; }
+        .custom-input { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 14px; border-radius: 12px; outline: none; font-size: 0.95rem; color: var(--text-main); transition: 0.3s; }
+        .main-btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.2s; }
         .main-btn:active { transform: scale(0.97); }
         
         .profile-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
         .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #60a5fa); color: white; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; margin: 0 auto 15px auto; border: 4px solid white; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+
+        /* Color Picker */
+        .color-picker { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .color-dot { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; }
+        .color-dot.active { border-color: var(--text-main); transform: scale(1.15); }
+        .bg-blue { background: #2563eb; } .bg-green { background: #16a34a; } .bg-yellow { background: #ca8a04; }
+        .bg-red { background: #dc2626; } .bg-purple { background: #9333ea; } .bg-dark { background: #1e293b; } .bg-gradient { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+
+        /* Backup Card */
+        .backup-card { background: var(--glass-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); margin-top: 5px; }
+
+        /* --- Header Radio Modal --- */
+        .radio-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 2000;
+            display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .radio-overlay.show { display: flex; opacity: 1; }
         
+        .radio-modal {
+            background: var(--nav-bg); width: 90%; max-width: 350px; padding: 25px;
+            border-radius: 24px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); text-align: center;
+            border: 1px solid var(--glass-border); transform: scale(0.9); transition: transform 0.3s ease;
+        }
+        .radio-overlay.show .radio-modal { transform: scale(1); }
+        
+        .radio-img { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 15px auto; object-fit: cover; box-shadow: 0 8px 25px rgba(0,0,0,0.15); border: 3px solid var(--primary); transition: 0.3s; }
+        .radio-controls-main { display: flex; justify-content: center; align-items: center; gap: 25px; margin-top: 20px; }
+        .radio-ctrl-btn { background: transparent; border: none; font-size: 1.8rem; color: var(--text-main); cursor: pointer; transition: 0.2s; }
+        .radio-ctrl-btn:active { transform: scale(0.9); }
+        .radio-play-btn { background: var(--primary); color: white; border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.8rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transition: 0.2s; cursor: pointer; }
+        .radio-play-btn:active { transform: scale(0.95); }
+
         /* --- Bottom Navigation --- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
             background: var(--nav-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center;
-            z-index: 1000; /* Ensure bottom nav is always on top */
-            padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            z-index: 1000; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: color 0.3s; flex: 1; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 0.65rem; font-weight: 600; cursor: pointer; transition: color 0.3s; flex: 1; }
         .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 1.3rem; margin-bottom: 2px; }
+        .nav-icon { font-size: 1.25rem; margin-bottom: 2px; }
 
     </style>
 </head>
 <body>
 
-    <!-- Top Sticky Area: Header + Category Nav -->
     <div class="top-sticky-container" id="topStickyContainer">
         <header class="app-header">
-            <div class="app-title"><i class="fa-solid fa-layer-group"></i> Kabbo News </div>
+            <div class="app-title"><i class="fa-solid fa-layer-group"></i> Kabbo Zine</div>
             <div class="header-actions">
+                <button class="icon-btn" id="headerRadioBtn" onclick="toggleRadioModal()" title="Open Radio">
+                    <i class="fa-solid fa-radio"></i>
+                </button>
                 <button class="icon-btn" onclick="toggleLayout()" id="layoutToggleBtn" title="Change View">
                     <i class="fa-solid fa-list-ul"></i>
                 </button>
             </div>
         </header>
 
-        <!-- Category Nav (Only visible on Home View) -->
-                        <nav class="category-nav" id="categoryNav">
-            <button class="tab-btn active" onclick="filterCategory('all', this)">সব খবর</button>
-            <button class="tab-btn" onclick="filterCategory('national', this)">জাতীয়</button>
-            <button class="tab-btn" onclick="filterCategory('online', this)">অনলাইন</button>
-            <button class="tab-btn" onclick="filterCategory('local', this)">আঞ্চলিক</button>
-            <button class="tab-btn" onclick="filterCategory('indian', this)">কলকাতা</button> <!-- নতুন -->
-            <button class="tab-btn" onclick="filterCategory('epaper', this)">ই-পেপার</button>
-            <button class="tab-btn" onclick="filterCategory('tv', this)">টিভি চ্যানেল</button>
-            <button class="tab-btn" onclick="filterCategory('magazine', this)">ম্যাগাজিন</button> <!-- নতুন -->
-            <button class="tab-btn" onclick="filterCategory('jobs', this)">চাকরি</button> <!-- নতুন -->
-            <button class="tab-btn" onclick="filterCategory('education', this)">শিক্ষা</button> <!-- নতুন -->
-            <button class="tab-btn" onclick="filterCategory('english', this)">English</button>
-            <button class="tab-btn" onclick="filterCategory('custom', this)">আমার লিংক</button>
+        <nav class="category-nav" id="categoryNav">
+            <button class="tab-btn active" onclick="filterCategory('all', this)">সব খবর <span class="count-badge" id="count-all">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('national', this)">জাতীয় <span class="count-badge" id="count-national">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('online', this)">অনলাইন <span class="count-badge" id="count-online">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('local', this)">আঞ্চলিক <span class="count-badge" id="count-local">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('indian', this)">কলকাতা <span class="count-badge" id="count-indian">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('epaper', this)">ই-পেপার <span class="count-badge" id="count-epaper">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('tv', this)">টিভি চ্যানেল <span class="count-badge" id="count-tv">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('magazine', this)">ম্যাগাজিন <span class="count-badge" id="count-magazine">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('jobs', this)">চাকরি <span class="count-badge" id="count-jobs">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('education', this)">শিক্ষা <span class="count-badge" id="count-education">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('ebook', this)">ই-বুক <span class="count-badge" id="count-ebook">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('islamic', this)">ইসলামিক <span class="count-badge" id="count-islamic">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('veterinary', this)">ভেটেরিনারি <span class="count-badge" id="count-veterinary">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('english', this)">English <span class="count-badge" id="count-english">0</span></button>
+            <button class="tab-btn" onclick="filterCategory('custom', this)">আমার লিংক <span class="count-badge" id="count-custom">0</span></button>
         </nav>
-        
     </div>
 
-    <!-- VIEW: Home (Categories & Grid) -->
     <div id="view-home" class="view-section active">
         <main class="news-container grid-view" id="homeGrid"></main>
     </div>
 
-    <!-- VIEW: Search & Favorites -->
     <div id="view-search" class="view-section">
         <div class="search-container">
             <div class="search-box">
@@ -188,14 +243,9 @@
                 <input type="text" id="searchInput" placeholder="পত্রিকার নাম বা লিংক খুঁজুন..." onkeyup="handleSearch()">
             </div>
         </div>
-        <div style="padding: 0 20px 10px 20px; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="font-size: 1rem; color: var(--text-main);">ফলাফল / ফেভারিটস</h3>
-            <button class="tab-btn" style="padding: 5px 15px;" onclick="showOnlyFavorites()">শুধু ফেভারিট</button>
-        </div>
         <main class="news-container grid-view" id="searchGrid"></main>
     </div>
 
-    <!-- VIEW: Add Custom URL -->
     <div id="view-add" class="view-section">
         <div class="form-container">
             <h2 style="color: var(--primary); margin-bottom: 5px;"><i class="fa-solid fa-link"></i> নতুন লিংক যুক্ত করুন</h2>
@@ -214,7 +264,14 @@
         </div>
     </div>
 
-    <!-- VIEW: Profile Management -->
+    <div id="view-fav" class="view-section">
+        <div style="padding: 20px 20px 5px 20px;">
+            <h2 style="color: var(--primary);"><i class="fa-solid fa-heart"></i> আমার ফেভারিট</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">আপনার সংরক্ষিত পছন্দের পত্রিকা ও লিংকগুলোর তালিকা।</p>
+        </div>
+        <main class="news-container grid-view" id="favGrid"></main>
+    </div>
+
     <div id="view-profile" class="view-section">
         <div class="profile-container">
             <div class="profile-card">
@@ -223,17 +280,37 @@
                 <p style="font-size: 0.85rem; color: var(--text-muted);">প্রোফাইল ম্যানেজার</p>
             </div>
             
-            <h3 style="margin-top: 10px; color: var(--text-main); font-size: 1.1rem;">প্রোফাইল এডিট করুন</h3>
+            <h3 style="margin-top: 10px; color: var(--text-main); font-size: 1.1rem;">প্রোফাইল এডিট</h3>
             <div class="input-group">
                 <label>আপনার নাম</label>
                 <input type="text" id="profileNameInput" class="custom-input" value="Kabbo">
             </div>
             <button class="main-btn" onclick="saveProfile()">আপডেট প্রোফাইল</button>
-            <button class="main-btn" onclick="clearAppData()" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); margin-top: 10px; box-shadow: none;">সমস্ত ডাটা মুছুন</button>
+
+            <h3 style="margin-top: 15px; color: var(--text-main); font-size: 1.1rem;">থিম কালার</h3>
+            <div class="color-picker">
+                <div class="color-dot bg-blue active" onclick="setTheme('blue', this)"></div>
+                <div class="color-dot bg-green" onclick="setTheme('green', this)"></div>
+                <div class="color-dot bg-yellow" onclick="setTheme('yellow', this)"></div>
+                <div class="color-dot bg-red" onclick="setTheme('red', this)"></div>
+                <div class="color-dot bg-purple" onclick="setTheme('purple', this)"></div>
+                <div class="color-dot bg-dark" onclick="setTheme('dark', this)"></div>
+                <div class="color-dot bg-gradient" onclick="setTheme('gradient', this)"></div>
+            </div>
+
+            <h3 style="margin-top: 10px; color: var(--text-main); font-size: 1.1rem;">ডাটা ব্যাকআপ ও রিস্টোর</h3>
+            <div class="backup-card">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">আপনার ফেভারিট, কাস্টম লিংক ও থিম কপি করে অন্য ডিভাইসে রিস্টোর করতে পারবেন।</p>
+                <div style="display: flex; gap: 10px;">
+                    <button class="main-btn" style="flex: 1; padding: 10px; font-size: 0.9rem;" onclick="backupData()">কপি করুন</button>
+                    <button class="main-btn" style="flex: 1; padding: 10px; font-size: 0.9rem; background: var(--text-main);" onclick="restoreData()">পেস্ট করুন</button>
+                </div>
+            </div>
+
+            <button class="main-btn" onclick="clearAppData()" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); margin-top: 15px; box-shadow: none;">সমস্ত ডাটা মুছুন</button>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchView('home', this)">
             <i class="fa-solid fa-house nav-icon"></i>
@@ -247,15 +324,49 @@
             <i class="fa-solid fa-circle-plus nav-icon"></i>
             <span>যুক্ত করুন</span>
         </div>
+        <div class="nav-item" onclick="switchView('fav', this)">
+            <i class="fa-solid fa-heart nav-icon"></i>
+            <span>ফেভারিট</span>
+        </div>
         <div class="nav-item" onclick="switchView('profile', this)">
-            <i class="fa-solid fa-user nav-icon"></i>
-            <span>প্রোফাইল</span>
+            <i class="fa-solid fa-gear nav-icon"></i>
+            <span>সেটিংস</span>
+        </div>
+    </div>
+    
+    <div class="radio-overlay" id="radioOverlay">
+        <div class="radio-modal">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">
+                <h3 style="color: var(--text-main); font-size: 1.1rem; display: flex; align-items: center; gap: 5px;">
+                    <i class="fa-solid fa-tower-broadcast" style="color: var(--danger); animation: pulse 1s infinite;"></i> লাইভ রেডিও
+                </h3>
+                <i class="fa-solid fa-xmark" style="font-size: 1.5rem; cursor: pointer; color: var(--text-muted);" onclick="toggleRadioModal()"></i>
+            </div>
+            
+            <img id="radioSyncImage" src="https://ui-avatars.com/api/?name=DFM&background=2563eb&color=fff&size=200" class="radio-img" alt="Radio Station">
+            <h4 id="radioStationName" style="color: var(--text-main); margin-bottom: 15px; font-size: 1.2rem;">Dhaka FM</h4>
+            
+            <select id="radioStationSelect" class="custom-input" style="width: 100%; margin-bottom: 20px; padding: 12px; font-weight: 600;" onchange="changeStationSelect()">
+                <option value="0">Dhaka FM</option>
+                <option value="1">Radio Today</option>
+                <option value="2">Shadhin Radio</option>
+                <option value="3">Radio Bushra</option>
+                <option value="4">Radio Gungun</option>
+                <option value="5">Radio Jamuna</option>
+                <option value="6">Radio Sondhi</option>
+            </select>
+
+            <div class="radio-controls-main">
+                <button class="radio-ctrl-btn" onclick="prevStation()"><i class="fa-solid fa-backward-step"></i></button>
+                <button class="radio-play-btn" id="radioPlayBtn" onclick="togglePlay()"><i class="fa-solid fa-play"></i></button>
+                <button class="radio-ctrl-btn" onclick="nextStation()"><i class="fa-solid fa-forward-step"></i></button>
+            </div>
+            <audio id="radioAudio" preload="none"></audio>
         </div>
     </div>
 
     <script>
-                // --- 1. Database ---
-                // --- 1. Database (Mega Collection) ---
+        // --- 1. Original 100% Intact Database ---
         const initialDB = [
             // --- জাতীয় (National) ---
             { id: "1", name: "প্রথম আলো", url: "https://www.prothom-alo.com", category: "national" },
@@ -459,58 +570,152 @@
             // --- শিক্ষা (Education) ---
             { id: "182", name: "Education Bangla", url: "https://educationbangla.com", category: "education" },
             { id: "183", name: "Educationboard Result", url: "https://educationboardresults.gov.bd", category: "education" },
-            { id: "184", name: "National University", url: "https://nu.edu.bd", category: "education" }
+            { id: "184", name: "National University", url: "https://nu.edu.bd", category: "education" },
+            
+            // --- ই-বুক ও পিডিএফ (eBook) ---
+            { id: "185", name: "Free BD Book", url: "https://freebdbook.com", category: "ebook" },
+            { id: "186", name: "eBangla Library", url: "https://www.ebanglalibrary.com", category: "ebook" },
+            { id: "187", name: "Bangla PDF Books", url: "https://banglapdf-books.blogspot.com", category: "ebook" },
+            { id: "188", name: "Go Bangla Books", url: "https://www.gobanglabooks.com", category: "ebook" },
+            { id: "189", name: "BD eBooks", url: "https://bdebooks.com", category: "ebook" },
+            { id: "190", name: "Bangla Book", url: "https://www.banglabook.org", category: "ebook" },
+            { id: "191", name: "Amar Books", url: "https://www.amarbooks.org", category: "ebook" },
+            { id: "192", name: "Bangla Pustak", url: "https://www.banglapustak.com", category: "ebook" },
+            { id: "193", name: "All Bangla Boi", url: "https://allbanglaboi.com", category: "ebook" },
+            { id: "194", name: "Porag Education", url: "https://www.porageducation.com", category: "ebook" },
+            { id: "195", name: "eBangla eBook", url: "https://www.ebanglaebook.com", category: "ebook" },
+            { id: "196", name: "Boi Pagal", url: "https://boipagal.com", category: "ebook" },
+            { id: "197", name: "Boi Premi", url: "http://boipremi.com", category: "ebook" },
+            { id: "198", name: "Shishu Kishor Books", url: "http://books.shishukishor.org", category: "ebook" },
+            { id: "199", name: "Bangla PDF", url: "https://www.banglapdf.net", category: "ebook" },
+            { id: "200", name: "Fussilat BD", url: "https://www.fussilatbd.com", category: "ebook" },
+            { id: "201", name: "Boi Download", url: "https://www.boidownload.com", category: "ebook" },
+            { id: "202", name: "Granthagara (Medical)", url: "https://granthagara.com", category: "ebook" },
+            { id: "203", name: "Boi Nibo", url: "https://www.boinibo.xyz", category: "ebook" },
+            { id: "204", name: "Bookish BD", url: "https://bookishbd.com", category: "ebook" },
+            { id: "205", name: "Bangla Boi PDF", url: "https://www.banglaboipdf.com", category: "ebook" },
+            { id: "206", name: "PDF Poro", url: "https://pdfporo.com/", category: "ebook" },
+            { id: "207", name: "Kobiraji PDF", url: "https://www.kobirajipdfbookshop.com/", category: "ebook" },
+            { id: "208", name: "PDF Hubs", url: "https://pdfhubs.com", category: "ebook" },
+            { id: "209", name: "Shifakhana", url: "https://www.shifakhana.com/", category: "ebook" },
+            { id: "210", name: "All Boi", url: "https://allboi.com/", category: "ebook" },
+
+            // --- চাকরি ও বিসিএস প্রস্তুতি (Jobs & BCS) ---
+            { id: "211", name: "IT Mona", url: "https://itmona.com", category: "jobs" },
+            { id: "212", name: "BD Niyog", url: "https://www.bdniyog.com/", category: "jobs" },
+            { id: "213", name: "Admission War", url: "https://www.admissionwar.com", category: "jobs" },
+            { id: "214", name: "Exam BD Books", url: "https://book.exambd.net/", category: "jobs" },
+            { id: "215", name: "MCQ Sir", url: "https://www.mcqsir.com/", category: "jobs" },
+            { id: "216", name: "MP Bian", url: "https://mp-bian.com/", category: "jobs" },
+            { id: "217", name: "BCS Examination", url: "https://bcsexamination.com/", category: "jobs" },
+            { id: "218", name: "BCS XM", url: "https://www.bcsxm.com/", category: "jobs" },
+            { id: "219", name: "Online BCS", url: "https://onlinebcs.com/", category: "jobs" },
+            { id: "220", name: "Hello BCS Blog", url: "https://blog.hellobcs.com/", category: "jobs" },
+
+            // --- শিক্ষামূলক সাইট (Education) ---
+            { id: "221", name: "CoursTika", url: "https://courstika.com/", category: "education" },
+            { id: "222", name: "Education Blog 24", url: "https://www.educationblog24.com/", category: "education" },
+            { id: "223", name: "Educations in BD", url: "https://educationsinbd.com/", category: "education" },
+            { id: "224", name: "Iqra Bari", url: "https://iqrabari.com/", category: "education" },
+
+            // --- স্টোরি ও ম্যাগাজিন (Story & Magazine) ---
+            { id: "225", name: "Bangla Love Story", url: "https://www.banglalovestory.in", category: "magazine" },
+            { id: "226", name: "Story Mirror", url: "https://storymirror.com", category: "magazine" },
+
+            // --- ইসলামিক বই ও আর্টিকেল (Islamic Books & Articles) ---
+            { id: "227", name: "Islami Boi PDF", url: "https://islamiboipdf.blogspot.com", category: "islamic" },
+            { id: "228", name: "Islamic Boi Somahar", url: "https://www.islamicboisomahar.in", category: "islamic" },
+            { id: "229", name: "Boi Mate", url: "https://boimate.com/", category: "islamic" },
+            { id: "230", name: "Islamic PDF Book", url: "https://www.islamicpdfbook.com/", category: "islamic" },
+            { id: "231", name: "Study Koro", url: "https://www.studykoro.com/", category: "islamic" },
+            { id: "232", name: "Al Qurans", url: "https://alqurans.com/", category: "islamic" },
+            { id: "233", name: "Islamic Books PDF", url: "https://islamicbookspdf.co/", category: "islamic" },
+            { id: "234", name: "As Siddik", url: "https://assiddik.com/", category: "islamic" },
+            { id: "235", name: "Aazeen of Islam", url: "https://aazeenofislam.com/", category: "islamic" },
+            { id: "236", name: "Boi Paw", url: "https://www.boipaw.com/", category: "islamic" },
+            { id: "237", name: "Sunni Encyclopedia", url: "https://www.sunni-encyclopedia.com/", category: "islamic" },
+            { id: "238", name: "Islamic Book House", url: "https://islamicbookhouse.wordpress.com", category: "islamic" },
+            { id: "239", name: "Islam House", url: "https://islamhouse.com", category: "islamic" },
+            { id: "240", name: "Islamic Alo", url: "http://www.islamicalo.com/", category: "islamic" },
+            { id: "241", name: "Quraner Kotha", url: "https://quranerkotha.com/", category: "islamic" },
+            { id: "242", name: "Quraner Alo", url: "http://www.quraneralo.com/", category: "islamic" },
+            { id: "243", name: "Authentic Islam", url: "http://preachingauthenticislaminbangla.blogspot.com/", category: "islamic" },
+            { id: "244", name: "Way to Jannah", url: "http://www.waytojannah.com/", category: "islamic" },
+            { id: "245", name: "Islam QA", url: "https://islamqa.info/", category: "islamic" },
+            { id: "246", name: "Shodalap", url: "http://shodalap.org/", category: "islamic" },
+            { id: "247", name: "Muslim Media", url: "https://www.muslimmedia.info/", category: "islamic" },
+            { id: "248", name: "NAK Bangla", url: "http://www.nakbangla.com/", category: "islamic" },
+            { id: "249", name: "Hadith BD", url: "https://www.hadithbd.com/", category: "islamic" },
+            { id: "250", name: "Quran Gov BD", url: "http://www.quran.gov.bd/", category: "islamic" },
+            { id: "251", name: "Al-Jannat BD", url: "http://al-jannatbd.com/", category: "islamic" },
+            { id: "252", name: "Salafi BD", url: "https://salafibd.wordpress.com/", category: "islamic" },
+            { id: "253", name: "i-Online Media", url: "http://i-onlinemedia.net/", category: "islamic" },
+
+            // --- ভেটেরিনারি (Veterinary) ---
+            { id: "254", name: "LEPVMBJ Books", url: "http://www.lepvmbj.org/book", category: "veterinary" }
         ];
 
-        // --- 2. State Management ---
-        let newsData = JSON.parse(localStorage.getItem('kabbo_news_db_v2')) || initialDB;
-        let favorites = JSON.parse(localStorage.getItem('kabbo_news_fav_v2')) || [];
-        let profileName = localStorage.getItem('kabbo_profile_name_v2') || "Kabbo";
+        // --- 2. State Management (Version 5 for clean setup) ---
+        let newsData = JSON.parse(localStorage.getItem('kabbo_news_db_v5')) || initialDB;
+        let favorites = JSON.parse(localStorage.getItem('kabbo_news_fav_v5')) || [];
+        let profileName = localStorage.getItem('kabbo_profile_name_v5') || "Kabbo";
+        let currentTheme = localStorage.getItem('kabbo_theme_v5') || 'blue';
         let currentCategory = 'all';
         let isGridView = localStorage.getItem('kabbo_layout_view') !== 'list';
 
-        // --- 3. UI Layout Toggle (Grid <-> List) ---
+        // --- 3. Category Counts ---
+        function updateCategoryCounts() {
+            const counts = {
+                all: newsData.length, national: 0, online: 0, local: 0, indian: 0, epaper: 0, tv: 0,
+                magazine: 0, jobs: 0, education: 0, ebook: 0, islamic: 0, veterinary: 0,
+                english: 0, custom: 0
+            };
+
+            newsData.forEach(news => { if (counts[news.category] !== undefined) counts[news.category]++; });
+
+            for (const category in counts) {
+                const el = document.getElementById(`count-${category}`);
+                if (el) el.innerText = counts[category];
+            }
+        }
+
+        // --- 4. Theme & Layout Logic ---
+        function setTheme(themeName, btnElement) {
+            currentTheme = themeName;
+            document.body.className = themeName === 'blue' ? '' : 'theme-' + themeName;
+            localStorage.setItem('kabbo_theme_v5', themeName);
+            
+            if(btnElement) {
+                document.querySelectorAll('.color-dot').forEach(el => el.classList.remove('active'));
+                btnElement.classList.add('active');
+            }
+        }
+        
+        function applySavedTheme() {
+            setTheme(currentTheme, document.querySelector(`.bg-${currentTheme === '' ? 'blue' : currentTheme}`));
+        }
+
         function toggleLayout() {
             isGridView = !isGridView;
             localStorage.setItem('kabbo_layout_view', isGridView ? 'grid' : 'list');
-            
-            const homeGrid = document.getElementById('homeGrid');
-            const searchGrid = document.getElementById('searchGrid');
-            const iconBtn = document.getElementById('layoutToggleBtn');
-            
-            if (isGridView) {
-                homeGrid.className = 'news-container grid-view';
-                searchGrid.className = 'news-container grid-view';
-                iconBtn.innerHTML = '<i class="fa-solid fa-list-ul"></i>';
-            } else {
-                homeGrid.className = 'news-container list-view';
-                searchGrid.className = 'news-container list-view';
-                iconBtn.innerHTML = '<i class="fa-solid fa-border-all"></i>';
-            }
+            applySavedLayout();
         }
 
-        // Apply saved layout on load
         function applySavedLayout() {
             const iconBtn = document.getElementById('layoutToggleBtn');
-            if (isGridView) {
-                document.getElementById('homeGrid').className = 'news-container grid-view';
-                document.getElementById('searchGrid').className = 'news-container grid-view';
-                iconBtn.innerHTML = '<i class="fa-solid fa-list-ul"></i>';
-            } else {
-                document.getElementById('homeGrid').className = 'news-container list-view';
-                document.getElementById('searchGrid').className = 'news-container list-view';
-                iconBtn.innerHTML = '<i class="fa-solid fa-border-all"></i>';
-            }
+            const grids = ['homeGrid', 'searchGrid', 'favGrid'];
+            
+            grids.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.className = isGridView ? 'news-container grid-view' : 'news-container list-view';
+            });
+            
+            iconBtn.innerHTML = isGridView ? '<i class="fa-solid fa-list-ul"></i>' : '<i class="fa-solid fa-border-all"></i>';
         }
 
-        // --- 4. Auto Sync Logo Fetcher ---
+        // --- 5. Helper & Rendering ---
         function getFaviconURL(url) {
-            try {
-                const domain = new URL(url).hostname;
-                return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
-            } catch (e) {
-                return '';
-            }
+            try { return `https://icons.duckduckgo.com/ip3/${new URL(url).hostname}.ico`; } catch(e) { return ''; }
         }
         
         function generateFallbackAvatar(name) {
@@ -535,9 +740,7 @@
                 const card = document.createElement('div');
                 card.className = 'news-card';
                 card.onclick = (e) => {
-                    if(!e.target.closest('.action-btn')) {
-                        window.open(news.url, '_blank');
-                    }
+                    if(!e.target.closest('.action-btn')) window.open(news.url, '_blank');
                 };
 
                 card.innerHTML = `
@@ -547,10 +750,10 @@
                         <div class="news-url">${cleanUrl}</div>
                     </div>
                     <div class="card-actions">
-                        <button class="action-btn ${isFav ? 'fav' : ''}" onclick="toggleFav('${news.id}', '${containerId}', event)">
+                        <button class="action-btn ${isFav ? 'fav' : ''}" onclick="toggleFav('${news.id}', event)">
                             <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
                         </button>
-                        <button class="action-btn" onclick="shareWeb('${news.name}', '${news.url}', event)">
+                        <button class="action-btn" onclick="shareWeb('${news.name}', '${news.url}', event)" style="margin-left: 10px;">
                             <i class="fa-solid fa-share-nodes"></i>
                         </button>
                         <button class="read-btn" onclick="window.open('${news.url}', '_blank')">ভিজিট</button>
@@ -560,47 +763,39 @@
             });
         }
 
-        // --- 5. Core Logic ---
+        // --- 6. Core Functions ---
         function filterCategory(cat, btnElement) {
             currentCategory = cat;
             document.querySelectorAll('#categoryNav .tab-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
-            
             let filtered = cat === 'all' ? newsData : newsData.filter(n => n.category === cat);
             renderGrid(filtered, 'homeGrid');
         }
 
         function handleSearch() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = newsData.filter(n => 
-                n.name.toLowerCase().includes(query) || n.url.toLowerCase().includes(query)
-            );
+            const filtered = newsData.filter(n => n.name.toLowerCase().includes(query) || n.url.toLowerCase().includes(query));
             renderGrid(filtered, 'searchGrid');
         }
 
-        function showOnlyFavorites() {
+        function renderFavorites() {
             const filtered = newsData.filter(n => favorites.includes(n.id));
-            renderGrid(filtered, 'searchGrid');
+            renderGrid(filtered, 'favGrid');
         }
 
-        function toggleFav(id, currentContainer, event) {
+        function toggleFav(id, event) {
             event.stopPropagation(); 
             if (favorites.includes(id)) {
                 favorites = favorites.filter(fId => fId !== id);
             } else {
                 favorites.push(id);
             }
-            localStorage.setItem('kabbo_news_fav_v2', JSON.stringify(favorites));
+            localStorage.setItem('kabbo_news_fav_v5', JSON.stringify(favorites));
             
-            if(currentContainer === 'homeGrid') {
-                filterCategory(currentCategory, document.querySelector('#categoryNav .tab-btn.active'));
-            } else {
-                if(document.getElementById('searchInput').value === "") {
-                    showOnlyFavorites();
-                } else {
-                    handleSearch(); 
-                }
-            }
+            // Re-render active views
+            filterCategory(currentCategory, document.querySelector('#categoryNav .tab-btn.active'));
+            renderFavorites();
+            if(document.getElementById('searchInput').value !== "") handleSearch();
         }
 
         function shareWeb(title, url, event) {
@@ -609,11 +804,10 @@
                 navigator.share({ title: title, url: url }).catch(err => console.log("Share failed", err));
             } else {
                 navigator.clipboard.writeText(url);
-                alert("আপনার ব্রাউজারে শেয়ার সাপোর্টেড নয়, লিংক কপি করা হয়েছে!");
+                alert("লিংক কপি করা হয়েছে!");
             }
         }
 
-        // --- 6. Forms & Profiles ---
         function saveCustomLink() {
             const name = document.getElementById('customName').value.trim();
             let url = document.getElementById('customUrl').value.trim();
@@ -624,14 +818,14 @@
             const newId = 'custom_' + Date.now();
             newsData.unshift({ id: newId, name: name, url: url, category: 'custom' });
             
-            localStorage.setItem('kabbo_news_db_v2', JSON.stringify(newsData));
+            localStorage.setItem('kabbo_news_db_v5', JSON.stringify(newsData));
+            updateCategoryCounts(); 
             
             document.getElementById('customName').value = '';
             document.getElementById('customUrl').value = '';
             alert("নতুন লিংক সফলভাবে যুক্ত হয়েছে!");
             
             renderGrid(newsData, 'homeGrid');
-            renderGrid(newsData, 'searchGrid');
             switchView('home', document.querySelector('.nav-item')); 
         }
 
@@ -639,24 +833,12 @@
             const newName = document.getElementById('profileNameInput').value.trim();
             if(newName) {
                 profileName = newName;
-                localStorage.setItem('kabbo_profile_name_v2', profileName);
+                localStorage.setItem('kabbo_profile_name_v5', profileName);
                 document.getElementById('displayProfileName').innerText = profileName;
                 alert("প্রোফাইল আপডেট হয়েছে!");
             }
         }
 
-        function clearAppData() {
-            if(confirm("আপনার যুক্ত করা কাস্টম লিংক এবং ফেভারিট লিস্ট মুছে যাবে। নিশ্চিত?")) {
-                localStorage.removeItem('kabbo_news_db_v2');
-                localStorage.removeItem('kabbo_news_fav_v2');
-                newsData = initialDB;
-                favorites = [];
-                initApp();
-                alert("ডাটা রিসেট হয়েছে!");
-            }
-        }
-
-        // --- 7. Navigation Control ---
         function switchView(viewName, navElement) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(`view-${viewName}`).classList.add('active');
@@ -665,25 +847,222 @@
             navElement.classList.add('active');
 
             const categoryNav = document.getElementById('categoryNav');
-            if(viewName === 'home') {
-                categoryNav.style.display = 'flex';
-            } else {
-                categoryNav.style.display = 'none';
-            }
+            categoryNav.style.display = viewName === 'home' ? 'flex' : 'none';
 
             if (viewName === 'search') document.getElementById('searchInput').focus();
+            if (viewName === 'fav') renderFavorites();
         }
 
-        // Boot up
+        // --- 7. Backup & Restore ---
+        function backupData() {
+            const dataToBackup = { fav: favorites, theme: currentTheme, profile: profileName, customDb: newsData.filter(n => n.category === 'custom') };
+            const jsonString = JSON.stringify(dataToBackup);
+            navigator.clipboard.writeText(jsonString).then(() => {
+                alert("ডাটা সফলভাবে কপি করা হয়েছে! এটি অন্য ডিভাইসে পেস্ট করে রিস্টোর করতে পারবেন।");
+            });
+        }
+
+        function restoreData() {
+            navigator.clipboard.readText().then(text => {
+                try {
+                    const parsed = JSON.parse(text);
+                    if(parsed.fav) {
+                        favorites = parsed.fav;
+                        localStorage.setItem('kabbo_news_fav_v5', JSON.stringify(favorites));
+                    }
+                    if(parsed.theme) setTheme(parsed.theme);
+                    if(parsed.profile) {
+                        profileName = parsed.profile;
+                        localStorage.setItem('kabbo_profile_name_v5', profileName);
+                    }
+                    if(parsed.customDb && parsed.customDb.length > 0) {
+                        const mergedDB = [...parsed.customDb, ...initialDB];
+                        newsData = Array.from(new Map(mergedDB.map(item => [item.id, item])).values());
+                        localStorage.setItem('kabbo_news_db_v5', JSON.stringify(newsData));
+                    }
+                    initApp();
+                    alert("ডাটা সফলভাবে রিস্টোর হয়েছে!");
+                } catch(e) {
+                    alert("ভুল ডাটা ফরমেট! সঠিক ডাটা পেস্ট করুন।");
+                }
+            });
+        }
+
+        function clearAppData() {
+            if(confirm("আপনার যুক্ত করা কাস্টম লিংক এবং ফেভারিট লিস্ট মুছে যাবে। নিশ্চিত?")) {
+                localStorage.removeItem('kabbo_news_db_v5');
+                localStorage.removeItem('kabbo_news_fav_v5');
+                localStorage.removeItem('kabbo_profile_name_v5');
+                localStorage.removeItem('kabbo_theme_v5');
+                location.reload();
+            }
+        }
+
+        // --- 8. Header Radio Logic (Prev/Next/Sync Image) ---
+        const radioStationsData = [
+            { name: "Dhaka FM", url: "https://stream.zeno.fm/u9mphfk604zuv", img: "https://ui-avatars.com/api/?name=DFM&background=2563eb&color=fff&size=200" },
+            { name: "Radio Today", url: "https://stream-285.surfernetwork.com/0zha3rfq02quv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiIwemhhM3JmcTAycXV2IiwiaG9zdCI6InN0cmVhbS0yODUuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6IjlsNkZEX3pfU3RLLUpzN3dHSThNUFEiLCJpYXQiOjE3ODM1NzQ5NzcsImV4cCI6MTc4MzU3NTAzN30.JG-9ndA8U_TJXC5Ale0_ohKciHpnx4d0ua_C8zH9B8Q", img: "https://ui-avatars.com/api/?name=RT&background=16a34a&color=fff&size=200" },
+            { name: "Shadhin Radio", url: "https://stream.zeno.fm/avxwtgyxubwtv", img: "https://ui-avatars.com/api/?name=SR&background=dc2626&color=fff&size=200" },
+            { name: "Radio Bushra", url: "https://stream.zeno.fm/u9mphfk604zuv", img: "https://ui-avatars.com/api/?name=RB&background=ca8a04&color=fff&size=200" },
+            { name: "Radio Gungun", url: "https://audio.streamcast.xyz/radio/8000/radio.mp3", img: "https://ui-avatars.com/api/?name=RG&background=9333ea&color=fff&size=200" },
+            { name: "Radio Jamuna", url: "https://stream.zeno.fm/pcmmlmkpvmmvv", img: "https://ui-avatars.com/api/?name=RJ&background=1e293b&color=fff&size=200" },
+            { name: "Radio Sondhi", url: "https://stream.zeno.fm/pcmmlmkpvmmvv", img: "https://ui-avatars.com/api/?name=RS&background=f97316&color=fff&size=200" }
+        ];
+
+        let currentStationIndex = 0;
+        let isRadioPlaying = false;
+        const radioAudio = document.getElementById('radioAudio');
+
+        function toggleRadioModal() {
+            const overlay = document.getElementById('radioOverlay');
+            overlay.classList.toggle('show');
+        }
+
+        function updateRadioUI() {
+            const station = radioStationsData[currentStationIndex];
+            document.getElementById('radioSyncImage').src = station.img;
+            document.getElementById('radioStationName').innerText = station.name;
+            document.getElementById('radioStationSelect').value = currentStationIndex;
+            radioAudio.src = station.url;
+            
+            if (isRadioPlaying) {
+                radioAudio.play().catch(()=>{});
+                document.getElementById('headerRadioBtn').classList.add('radio-pulse');
+            }
+        }
+
+        function changeStationSelect() {
+            currentStationIndex = parseInt(document.getElementById('radioStationSelect').value);
+            updateRadioUI();
+        }
+
+        function prevStation() {
+            currentStationIndex = (currentStationIndex - 1 + radioStationsData.length) % radioStationsData.length;
+            updateRadioUI();
+        }
+
+        function nextStation() {
+            currentStationIndex = (currentStationIndex + 1) % radioStationsData.length;
+            updateRadioUI();
+        }
+
+        function togglePlay() {
+            const playBtn = document.getElementById('radioPlayBtn');
+            const headerBtn = document.getElementById('headerRadioBtn');
+            
+            if (!radioAudio.src) updateRadioUI();
+
+            if (isRadioPlaying) {
+                radioAudio.pause();
+                playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                headerBtn.classList.remove('radio-pulse');
+                isRadioPlaying = false;
+            } else {
+                playBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                radioAudio.play().then(() => {
+                    playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                    headerBtn.classList.add('radio-pulse');
+                    isRadioPlaying = true;
+                }).catch(() => {
+                    alert("স্ট্রিমিং শুরু করতে সমস্যা হচ্ছে। ইন্টারনেট কানেকশন চেক করুন।");
+                    playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                });
+            }
+        }
+
+        // --- 9. Boot up ---
         function initApp() {
+            applySavedTheme();
             applySavedLayout();
+            updateCategoryCounts();
             document.getElementById('displayProfileName').innerText = profileName;
             document.getElementById('profileNameInput').value = profileName;
             renderGrid(newsData, 'homeGrid');
             renderGrid(newsData, 'searchGrid');
+            renderFavorites();
         }
 
         window.onload = initApp;
+        
+        <!-- Single File PWA Logic (Blob Magic) -->
+        
+    // ১. ডায়নামিক Manifest.json তৈরি
+    const manifestData = {
+        "name": "News Hub Pro",
+        "short_name": "Kabbo Zine",
+        "description": "Your ultimate daily news and radio hub.",
+        "start_url": window.location.href, // বর্তমান ইউআরএল অটোমেটিক নিয়ে নিবে
+        "display": "standalone",
+        "background_color": "#e0eaf5",
+        "theme_color": "#2563eb",
+        "orientation": "portrait",
+        "icons": [
+            {
+                "src": "https://ui-avatars.com/api/?name=K&background=2563eb&color=fff&size=192",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "https://ui-avatars.com/api/?name=K&background=2563eb&color=fff&size=512",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ]
+    };
+
+    // ম্যানিফেস্ট ফাইল ইনজেক্ট করা
+    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
+    const manifestUrl = URL.createObjectURL(manifestBlob);
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = manifestUrl;
+    document.head.appendChild(manifestLink);
+
+    // ২. ডায়নামিক Service Worker (sw.js) তৈরি
+    const swCode = `
+        const CACHE_NAME = 'kabbo-news-hub-v5';
+        
+        self.addEventListener('install', event => {
+            self.skipWaiting();
+            console.log('Service Worker Installed via Blob!');
+        });
+        
+        self.addEventListener('activate', event => {
+            event.waitUntil(clients.claim());
+        });
+        
+        self.addEventListener('fetch', event => {
+            // বেসিক অফলাইন সাপোর্ট লজিক
+            event.respondWith(
+                fetch(event.request).catch(() => {
+                    return new Response('<h2 style="text-align:center;font-family:sans-serif;margin-top:20px;">No Internet Connection</h2>', {
+                        headers: { 'Content-Type': 'text/html' }
+                    });
+                })
+            );
+        });
+    `;
+
+    // Service Worker ইনজেক্ট করা
+    const swBlob = new Blob([swCode], { type: 'text/javascript' });
+    const swUrl = URL.createObjectURL(swBlob);
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register(swUrl)
+                .then(reg => console.log('Single File PWA Registered! Scope:', reg.scope))
+                .catch(err => console.log('PWA Registration Failed:', err));
+        });
+    }
+
+    // "Add to Home Screen" প্রম্পট ইভেন্ট হ্যান্ডলার
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('App is ready to be installed!');
+        // আপনি চাইলে এখানে নিজের ডিজাইন করা একটি "Install App" বাটন ট্রিগার করতে পারেন
+    });
 
     </script>
 </body>
